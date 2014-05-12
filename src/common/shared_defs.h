@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Mon 12 May 2014 15:09:21 BST
+// Last Update: Mon 12 May 2014 16:39:57 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -26,13 +26,13 @@ using namespace std;
 // #define LBFGS_FLOAT 32
 // #endif
 
-#if   LBFGS_FLOAT == 32
-typedef float Real; // necessary for fast math library
-#elif LBFGS_FLOAT == 64
-typedef double Real;
-#else
+/* #if   LBFGS_FLOAT == 32 */
+/* typedef float Real; // necessary for fast math library */
+/* #elif LBFGS_FLOAT == 64 */
+/* typedef double Real; */
+/* #else */
 typedef float Real;
-#endif
+/* #endif */
 
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixReal;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1>              VectorReal;
