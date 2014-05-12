@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Thu 02 Jan 2014 01:29:21 PM GMT
+// Last Update: Mon 12 May 2014 15:09:21 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -30,6 +30,8 @@ using namespace std;
 typedef float Real; // necessary for fast math library
 #elif LBFGS_FLOAT == 64
 typedef double Real;
+#else
+typedef float Real;
 #endif
 
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixReal;
@@ -115,7 +117,7 @@ struct modvars
   void multiply(Real multiplier) {};
 };
 
-template<> inline void modvars<Real>::init() { D = 0.0; U = 0.0; V = 0.0; W = 0.0; A = 0.0; Wd = 0.0; Wdr = 0.0; Bd = 0.0; Bdr = 0.0; Wf = 0.0; Wl = 0.0; Bl = 0.0; alpha_rae = 0.0; alpha_lbl = 0.0; }
+template<> inline void modvars<float>::init() { D = 0.0; U = 0.0; V = 0.0; W = 0.0; A = 0.0; Wd = 0.0; Wdr = 0.0; Bd = 0.0; Bdr = 0.0; Wf = 0.0; Wl = 0.0; Bl = 0.0; alpha_rae = 0.0; alpha_lbl = 0.0; }
 template<> inline void modvars<double>::init() { D = 0.0; U = 0.0; V = 0.0; W = 0.0; A = 0.0; Wd = 0.0; Wdr = 0.0; Bd = 0.0; Bdr = 0.0; Wf = 0.0; Wl = 0.0; Bl = 0.0; alpha_rae = 0.0; alpha_lbl = 0.0; }
 template<> inline void modvars<int>::init() { D = 0; U = 0; V = 0; W = 0; A = 0; Wd = 0; Wdr = 0; Bd = 0; Bdr = 0; Wf = 0; Wl = 0; Bl = 0; alpha_rae = 0; alpha_lbl = 0; }
 template<> inline void modvars<bool>::init() { D = true; U = true; V = true; W = true; A = true; Wd = true; Wdr = true; Bd = true; Bdr = true; Wf = true; Wl = true; Bl = true; alpha_rae = true; alpha_lbl = true; }

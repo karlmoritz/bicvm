@@ -1,7 +1,7 @@
 // File: finetune_classifier.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 29-01-2013
-// Last Update: Thu 17 Oct 2013 03:38:03 PM BST
+// Last Update: Mon 12 May 2014 16:20:31 BST
 /*------------------------------------------------------------------------
  * Description: Additional logistic regression training on the top part
  * of the model (i.e. after the RAE training).
@@ -16,9 +16,6 @@
 
 #ifndef FINETUNE_CLASSIFIER_H_6NDFQBY1
 #define FINETUNE_CLASSIFIER_H_6NDFQBY1
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "shared_defs.h"
@@ -36,32 +33,32 @@ public:
   ~FinetuneClassifier();
 
   // Subfunctions for LBFGS and SGD training respectively
-  void trainLbfgs(LineSearchType linesearch);
+  /* void trainLbfgs(LineSearchType linesearch); */
   void trainAdaGrad();
   //void finetune_sgd();
 
   void evaluate(bool test);
 
 protected:
-  static int lbfgs_progress_(
-      void *instance,
-      const Real *x,
-      const Real *g,
-      const Real fx,
-      const Real xnorm,
-      const Real gnorm,
-      const Real step,
-      int n,
-      int k,
-      int ls
-      );
+  /* static int lbfgs_progress_( */
+      /* void *instance, */
+      /* const Real *x, */
+      /* const Real *g, */
+      /* const Real fx, */
+      /* const Real xnorm, */
+      /* const Real gnorm, */
+      /* const Real step, */
+      /* int n, */
+      /* int k, */
+      /* int ls */
+      /* ); */
 
-  static Real lbfgs_evaluate_(
-      void *instance,
-      const Real *x, // Variables (theta)
-      Real *g,       // Put gradient here
-      const int n,              // Number of variables
-      const Real step);  // line-search step used in this iteration
+  /* static Real lbfgs_evaluate_( */
+      /* void *instance, */
+      /* const Real *x, // Variables (theta) */
+      /* Real *g,       // Put gradient here */
+      /* const int n,              // Number of variables */
+      /* const Real step);  // line-search step used in this iteration */
 
 public:
 

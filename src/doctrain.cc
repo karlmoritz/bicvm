@@ -1,7 +1,7 @@
 // File: doctrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 07 May 2014 16:49:09 BST
+// Last Update: Mon 12 May 2014 16:14:10 BST
 
 // STL
 #include <iostream>
@@ -36,7 +36,7 @@
 #include "common/finetune_classifier.h"
 
 // Training Regimes
-#include "common/train_lbfgs.h"
+/* #include "common/train_lbfgs.h" */
 #include "common/train_sgd.h"
 #include "common/train_adagrad.h"
 
@@ -538,7 +538,7 @@ int main(int argc, char **argv)
   if (config.training_method == 0)
   {
     cout << "Training with LBFGS" << endl;
-    train_lbfgs(modelA,linesearch,iterations,epsilon,lambdas);
+    /* train_lbfgs(modelA,linesearch,iterations,epsilon,lambdas); */
   }
   else if (config.training_method == 1)
   {
@@ -559,7 +559,7 @@ int main(int argc, char **argv)
   if (config.training_method == 4)
   {
     cout << "Training with LBFGS (minibatch)" << endl;
-    train_lbfgs_minibatch(modelA,linesearch,iterations,epsilon,batches,lambdas);
+    /* train_lbfgs_minibatch(modelA,linesearch,iterations,epsilon,batches,lambdas); */
   }
 
   /***************************************************************************

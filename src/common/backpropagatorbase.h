@@ -1,13 +1,13 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Thu 02 Jan 2014 06:08:33 PM GMT
+// Last Update: Mon 12 May 2014 16:28:13 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
 
 // L-BFGS
-#include <lbfgs.h>
+/* #include <lbfgs.h> */
 
 // Local
 #include "shared_defs.h"

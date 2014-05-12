@@ -1,7 +1,7 @@
 // File: finetune_classifier.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 29-01-2013
-// Last Update: Thu 17 Oct 2013 07:38:31 PM BST
+// Last Update: Mon 12 May 2014 16:21:15 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -21,9 +21,6 @@
 // Boost
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "finetune_classifier.h"
@@ -355,32 +352,32 @@ void FinetuneClassifier::evaluate(bool test)
     cout << "Acc/F1: " << accuracy << " " << f1score << endl;
 }
 
-void FinetuneClassifier::trainLbfgs(LineSearchType linesearch)
-{
-  batch_from = 0;
-  batch_to = train_length;
+/* void FinetuneClassifier::trainLbfgs(LineSearchType linesearch) */
+/* { */
+  /* batch_from = 0; */
+  /* batch_to = train_length; */
 
-  lbfgs_parameter_t param;
-  lbfgs_parameter_init(&param);
-  param.linesearch = linesearch;
-  param.max_iterations = iterations;
-  //param.epsilon = 0.00000001;
-  param.m = 25;
+  /* lbfgs_parameter_t param; */
+  /* lbfgs_parameter_init(&param); */
+  /* param.linesearch = linesearch; */
+  /* param.max_iterations = iterations; */
+  /* //param.epsilon = 0.00000001; */
+  /* param.m = 25; */
 
-  const int n = theta_size_;
-  auto vars = theta_;
-  Real error = 0.0;
+  /* const int n = theta_size_; */
+  /* auto vars = theta_; */
+  /* Real error = 0.0; */
 
-  int tries = 0;
+  /* int tries = 0; */
 
-  while (tries < 3 and it_count < 250)
-  {
-    int ret = lbfgs(n, vars, &error, lbfgs_evaluate_, lbfgs_progress_, this, &param);
-    cout << "L-BFGS optimization terminated with status code = " << ret << endl;
-    cout << "fx=" << error << endl;
-    ++tries;
-  }
-}
+  /* while (tries < 3 and it_count < 250) */
+  /* { */
+    /* int ret = lbfgs(n, vars, &error, lbfgs_evaluate_, lbfgs_progress_, this, &param); */
+    /* cout << "L-BFGS optimization terminated with status code = " << ret << endl; */
+    /* cout << "fx=" << error << endl; */
+    /* ++tries; */
+  /* } */
+/* } */
 
 void FinetuneClassifier::trainAdaGrad()
 {
@@ -441,43 +438,43 @@ void FinetuneClassifier::trainAdaGrad()
 
 }
 
-Real FinetuneClassifier::lbfgs_evaluate_(
-    void *instance,
-    const Real *x,
-    Real *g,
-    const int n,
-    const Real step
-    )
-{
-  return reinterpret_cast<FinetuneClassifier*>(instance)->finetuneCostAndGrad_(g, n);
-}
+/* Real FinetuneClassifier::lbfgs_evaluate_( */
+    /* void *instance, */
+    /* const Real *x, */
+    /* Real *g, */
+    /* const int n, */
+    /* const Real step */
+    /* ) */
+/* { */
+  /* return reinterpret_cast<FinetuneClassifier*>(instance)->finetuneCostAndGrad_(g, n); */
+/* } */
 
-int FinetuneClassifier::lbfgs_progress_(
-    void *instance,
-    const Real *x,
-    const Real *g,
-    const Real fx,
-    const Real xnorm,
-    const Real gnorm,
-    const Real step,
-    int n,
-    int k,
-    int ls
-    )
-{
-  cout << "N: " << n << endl;
-  printf("Iteration %d:\n", k);
-  printf("  fx = %f, x[0] = %f, x[1] = %f %f\n", fx, x[0], x[1], x[2]);
-  printf("  fx = %f, g[0] = %f, g[1] = %f %f\n", fx, g[0], g[1], g[2]);
-  printf("  xnorm = %f, gnorm = %f, step = %f\n", xnorm, gnorm, step);
-  printf("\n");
+/* int FinetuneClassifier::lbfgs_progress_( */
+    /* void *instance, */
+    /* const Real *x, */
+    /* const Real *g, */
+    /* const Real fx, */
+    /* const Real xnorm, */
+    /* const Real gnorm, */
+    /* const Real step, */
+    /* int n, */
+    /* int k, */
+    /* int ls */
+    /* ) */
+/* { */
+  /* cout << "N: " << n << endl; */
+  /* printf("Iteration %d:\n", k); */
+  /* printf("  fx = %f, x[0] = %f, x[1] = %f %f\n", fx, x[0], x[1], x[2]); */
+  /* printf("  fx = %f, g[0] = %f, g[1] = %f %f\n", fx, g[0], g[1], g[2]); */
+  /* printf("  xnorm = %f, gnorm = %f, step = %f\n", xnorm, gnorm, step); */
+  /* printf("\n"); */
 
 
-  reinterpret_cast<FinetuneClassifier*>(instance)->it_count++;
-  reinterpret_cast<FinetuneClassifier*>(instance)->evaluate(true);
-  reinterpret_cast<FinetuneClassifier*>(instance)->evaluate(false);
-  return 0;
-}
+  /* reinterpret_cast<FinetuneClassifier*>(instance)->it_count++; */
+  /* reinterpret_cast<FinetuneClassifier*>(instance)->evaluate(true); */
+  /* reinterpret_cast<FinetuneClassifier*>(instance)->evaluate(false); */
+  /* return 0; */
+/* } */
 
 // ForwardPropagates and returns error and gradient on self
 Real FinetuneClassifier::finetuneCostAndGrad_(

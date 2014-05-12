@@ -1,15 +1,7 @@
 // File: train_lbfgs.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-01-2013
-// Last Update: Thu 02 Jan 2014 03:35:21 PM GMT
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Mon 12 May 2014 16:11:51 BST
 
 // STL
 #include <iostream>
