@@ -1,7 +1,7 @@
 // File: ted-to-libsvm.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 18:02:11 BST
+// Last Update: Mon 12 May 2014 18:15:32 BST
 
 // STL
 #include <iostream>
@@ -51,9 +51,11 @@
 #include "common/train_lbfgs.h"
 #include "common/train_sgd.h"
 #include "common/train_adagrad.h"
-
-#include "common/train_update.h"
 #include "common/finite_grad_check.h"
+
+#include "common/trainer.h"
+#include "common/openqa_trainer.h"
+#include "common/general_trainer.h"
 
 #define EIGEN_DONT_PARALLELIZE
 

@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 18:08:16 BST
+// Last Update: Mon 12 May 2014 18:15:11 BST
 
 // STL
 #include <iostream>
@@ -42,13 +42,11 @@
 #include "common/train_lbfgs.h"
 #include "common/train_sgd.h"
 #include "common/train_adagrad.h"
+#include "common/finite_grad_check.h"
 
 #include "common/trainer.h"
 #include "common/openqa_trainer.h"
 #include "common/general_trainer.h"
-
-#include "common/finite_grad_check.h"
-
 
 #define EIGEN_DONT_PARALLELIZE
 

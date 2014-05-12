@@ -26,7 +26,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.45.0 COMPONENTS serialization program_options filesystem
-  system date_time REQUIRED)
+  system date_time regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 # link_directories(${Boost_LIBRARY_DIRS})
 # set(link_libraries(train_cnlm ${Boost_LIBRARIES} cnlm)
@@ -75,7 +75,8 @@ add_library(pugi SHARED pugi/pugixml.cpp)
 # Executables
 #############################################
 
-set(EXECUTABLES dbltrain doctrain)
+set(EXECUTABLES dbltrain doctrain extract-vectors extract-comp-vectors
+  ted-to-libsvm)
 foreach(f ${EXECUTABLES})
   add_executable(${f} ${f}.cc)
   target_link_libraries(${f} basics loaders trainers basemod dualtrain modadditive modflattree pugi)
