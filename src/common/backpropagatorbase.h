@@ -1,7 +1,7 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Mon 12 May 2014 16:28:13 BST
+// Last Update: Mon 12 May 2014 17:44:01 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
@@ -12,6 +12,10 @@
 // Local
 #include "shared_defs.h"
 #include "recursive_autoencoder.h"
+
+class Trainer;
+class GeneralTrainer;
+class OpenQATrainer;
 
 class BackpropagatorBase
 {
@@ -54,14 +58,17 @@ public:
   // unfold given a root node, calculates sets gradient (A given B)
   void unfoldPropagateGiven(int i, SinglePropBase* other, VectorReal* gradient);
 
-  friend void computeBiCostAndGrad(Model& modelA, Model& modelB, const Real* x,
-                                   Real* gradient_location, int n,
-                                   int iteration, BProps& prop, Real* error);
-  friend void computeCostAndGrad( Model &model,
-                                            const Real* x,
-                                            Real* gradient_location,
-                                            int n, int iteration, BProps& prop,
-                                            Real* error);
+  friend class Trainer;
+  friend class OpenQATrainer;
+  friend class GeneralTrainer;
+  /* friend void computeBiCostAndGrad(Model& modelA, Model& modelB, const Real* x, */
+                                   /* Real* gradient_location, int n, */
+                                   /* int iteration, BProps& prop, Real* error); */
+  /* friend void computeCostAndGrad( Model &model, */
+                                            /* const Real* x, */
+                                            /* Real* gradient_location, */
+                                            /* int n, int iteration, BProps& prop, */
+                                            /* Real* error); */
 
 protected:
   RecursiveAutoencoderBase* rae_;

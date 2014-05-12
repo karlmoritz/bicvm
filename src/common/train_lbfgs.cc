@@ -1,7 +1,7 @@
 // File: train_lbfgs.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-01-2013
-// Last Update: Mon 12 May 2014 16:11:51 BST
+// Last Update: Mon 12 May 2014 17:36:57 BST
 
 // STL
 #include <iostream>
@@ -17,7 +17,9 @@
 
 // Local
 #include "train_lbfgs.h"
-#include "train_update.h"
+#include "trainer.h"
+#include "general_trainer.h"
+#include "openqa_trainer.h"
 
 #include "utils.h"
 #include "recursive_autoencoder.h"
@@ -43,7 +45,7 @@ int train_lbfgs(Model& model, LineSearchType linesearch, int max_iterations, Rea
   Real* vars = nullptr;
   int number_vars = 0;
 
-  setVarsAndNumber(vars,number_vars,model);
+  model.trainer->setVarsAndNumber(vars,number_vars,model);
 
   const int n = number_vars;
   Real error = 0.0;
@@ -134,7 +136,7 @@ int train_lbfgs_minibatch(Model& model, LineSearchType linesearch, int
   Real* vars = nullptr;
 
   int number_vars = 0;
-  setVarsAndNumber(vars,number_vars,model);
+  model.trainer->setVarsAndNumber(vars,number_vars,model);
   const int n = number_vars;
 
   std::random_device rd;

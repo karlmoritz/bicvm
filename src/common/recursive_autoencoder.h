@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Mon 12 May 2014 16:28:07 BST
+// Last Update: Mon 12 May 2014 17:43:53 BST
 
 #ifndef COMMON_RECURSIVE_AUTOENCODER_H
 #define COMMON_RECURSIVE_AUTOENCODER_H
@@ -17,6 +17,9 @@
 
 class SinglePropBase;
 class BackpropagatorBase;
+class Trainer;
+class GeneralTrainer;
+class OpenQATrainer;
 
 class RecursiveAutoencoderBase {
  public:
@@ -75,16 +78,19 @@ class RecursiveAutoencoderBase {
 
  public:
   friend class Senna;
-  friend void setVarsAndNumber(Real *&vars, int &number_vars, Model &model);
+  friend class Trainer;
+  friend class OpenQATrainer;
+  friend class GeneralTrainer;
+  /* void setVarsAndNumber(Real *&vars, int &number_vars, Model &model); */
   friend int main(int argc, char **argv);
 
   friend RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae,
                                                 TrainingCorpus& trainC,
                                                 TrainingCorpus& testC);
   friend class boost::serialization::access;
-  friend void computeBiCostAndGrad(Model& modelA, Model& modelB, const Real* x,
-                                   Real* gradient_location, int n,
-                                   int iteration, BProps& prop, Real* error);
+  /* friend void computeBiCostAndGrad(Model& modelA, Model& modelB, const Real* x, */
+                                   /* Real* gradient_location, int n, */
+                                   /* int iteration, BProps& prop, Real* error); */
 
   template<class Archive>
       void save(Archive& ar, const unsigned version) const {

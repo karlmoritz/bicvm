@@ -1,7 +1,7 @@
 // File: finite_grad_check.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 07 Jan 2014 10:58:55 PM GMT
+// Last Update: Mon 12 May 2014 17:34:10 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -26,7 +26,9 @@
 
 // Local
 #include "finite_grad_check.h"
-#include "train_update.h"
+#include "trainer.h"
+#include "general_trainer.h"
+#include "openqa_trainer.h"
 #include "recursive_autoencoder.h"
 
 using namespace std;
@@ -54,7 +56,7 @@ void finite_grad_check(Model &model, Lambdas lambdas)
 
   BProps props(model);
   Real error1 = 0.0, error2;
-  computeCostAndGrad(model,nullptr,data1,number_vars,0,props,&error1);
+  model.trainer->computeCostAndGrad(model,nullptr,data1,number_vars,0,props,&error1);
 
   modvars<Real> dists;
   dists.init();
@@ -65,7 +67,7 @@ void finite_grad_check(Model &model, Lambdas lambdas)
   {
     theta[i] += delta;
     error2 = 0.0;
-    computeCostAndGrad(model,nullptr,data2,number_vars,0,props,&error2);
+    model.trainer->computeCostAndGrad(model,nullptr,data2,number_vars,0,props,&error2);
     Real xdev = (error2 - error1) / delta;
     theta[i] -= delta;
     if (i < counts.D)   { dists.D += abs(grad[i] - xdev);   cout << "D   "; }
@@ -141,7 +143,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   {
   BProps props(model);
       Real errorX = 0;
-  computeCostAndGrad(model,nullptr,data1,double_vars,0,props,&errorX);
+  model.trainer->computeCostAndGrad(model,nullptr,data1,double_vars,0,props,&errorX);
 #pragma omp critical
       {
         error1 += errorX;
@@ -154,7 +156,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   {
   BProps props(model);
       Real errorX = 0;
-  computeCostAndGrad(model,nullptr,data1,double_vars,1,props,&errorX);
+  model.trainer->computeCostAndGrad(model,nullptr,data1,double_vars,1,props,&errorX);
 #pragma omp critical
       {
         error1 += errorX;
@@ -179,7 +181,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     {
       BProps props(model);
       Real errorX = 0;
-      computeCostAndGrad(model,nullptr,data2,double_vars,0,props,&errorX);
+      model.trainer->computeCostAndGrad(model,nullptr,data2,double_vars,0,props,&errorX);
 #pragma omp critical
       {
         error2 += errorX;
@@ -191,7 +193,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     {
       BProps props(model);
       Real errorX = 0;
-      computeCostAndGrad(model,nullptr,data2,double_vars,1,props,&errorX);
+      model.trainer->computeCostAndGrad(model,nullptr,data2,double_vars,1,props,&errorX);
 #pragma omp critical
       {
         error2 += errorX;

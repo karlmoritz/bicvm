@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 08 Jan 2014 04:15:52 PM GMT
+// Last Update: Mon 12 May 2014 17:36:48 BST
 
 // STL
 #include <iostream>
@@ -18,7 +18,9 @@
 
 // Local
 #include "train_adagrad.h"
-#include "train_update.h"
+#include "trainer.h"
+#include "general_trainer.h"
+#include "openqa_trainer.h"
 #include "recursive_autoencoder.h"
 #include "utils.h"
 #include "fast_math.h"
@@ -31,7 +33,7 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int bat
 {
   Real* vars = nullptr;
   int number_vars = 0;
-  setVarsAndNumber(vars,number_vars,model);
+  model.trainer->setVarsAndNumber(vars,number_vars,model);
   WeightArrayType theta(vars,number_vars);
   Real* Gt_d = new Real[number_vars]();
   WeightArrayType Gt(Gt_d,number_vars);
@@ -82,7 +84,7 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int bat
           error = 0.0;
         }
         l1_batch = l1 * (model.to - model.from) / size;
-        computeCostAndGrad(model,nullptr,gradient,number_vars,iteration,props,&error);
+        model.trainer->computeCostAndGrad(model,nullptr,gradient,number_vars,iteration,props,&error);
 #pragma omp barrier
 // #pragma omp single
         // {
@@ -114,7 +116,7 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int bat
 #pragma omp single
         {
           cout << "Correct";
-          testModel(*tmodel);
+          model.trainer->testModel(*tmodel);
           cout << endl;
         }
       }

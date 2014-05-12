@@ -1,7 +1,7 @@
 // File: train_sgd.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 02 Jan 2014 03:35:45 PM GMT
+// Last Update: Mon 12 May 2014 17:36:53 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -26,7 +26,9 @@
 
 // Local
 #include "train_sgd.h"
-#include "train_update.h"
+#include "trainer.h"
+#include "general_trainer.h"
+#include "openqa_trainer.h"
 #include "recursive_autoencoder.h"
 #include "utils.h"
 
@@ -39,7 +41,7 @@ int train_sgd(Model &model, int iterations, Real eta, Lambdas lambdas)
   Real* vars = nullptr;
   int number_vars = 0;
 
-  setVarsAndNumber(vars,number_vars,model);
+  model.trainer->setVarsAndNumber(vars,number_vars,model);
   cout << vars;
 
   // Real eta_t0 = eta;
@@ -60,7 +62,7 @@ int train_sgd(Model &model, int iterations, Real eta, Lambdas lambdas)
     model.rae->debugSize(3);
     WeightVectorType grad(data1,number_vars);
     Real new_error = 0.0;
-    computeCostAndGrad(model,nullptr,data1,number_vars,iteration,props,&new_error);
+    model.trainer->computeCostAndGrad(model,nullptr,data1,number_vars,iteration,props,&new_error);
     cout << "Correct (error): " << new_error << " ... etc: " << eta << endl;
     cout << "Grad sum " << grad.sum();
     cout << "Theta sum " << theta.sum();

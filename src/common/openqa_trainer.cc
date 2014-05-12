@@ -1,9 +1,9 @@
-// File: train_update.cc
+// File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 08 Jan 2014 12:38:18 AM GMT
+// Last Update: Mon 12 May 2014 17:27:21 BST
 
-#include "train_update.h"
+#include "openqa_trainer.h"
 
 #include <iostream>
 #include <random>
@@ -12,7 +12,7 @@
 #include "shared_defs.h"
 #include "models.h"
 
-void computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
+void OpenQATrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
                         int n, int iteration, BProps& props, Real* error)
 {
   props.propA->reset();
@@ -26,68 +26,9 @@ void computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
     computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
     return;
   }
-
-  WeightVectorType weights(gradient_location,n);
-#pragma omp single
-  {
-    weights.setZero();
-  }
-
-  BackpropagatorBase* lblprop = (model.rae->config.calc_lbl) ? model.rae->getBackpropagator(model,n) : nullptr;
-  BackpropagatorBase* raeprop = (model.rae->config.calc_rae) ? model.rae->getBackpropagator(model,n) : nullptr;
-  BackpropagatorBase* uaeprop = (model.rae->config.calc_uae) ? model.rae->getBackpropagator(model,n) : nullptr;
-
-  size_t thread_num = omp_get_thread_num();
-  size_t num_threads = omp_get_num_threads();
-  for (size_t i = model.from + thread_num; i < model.to; i += num_threads) {
-    int j = model.indexes[i];
-    VectorReal x(model.rae->config.word_representation_size);
-    if (model.rae->config.calc_lbl) lblprop->backPropagateLbl(j,&x);
-    if (model.rae->config.calc_rae) raeprop->backPropagateRae(j,&x);
-    if (model.rae->config.calc_uae) uaeprop->backPropagateUnf(j,&x);
-
-#pragma omp critical
-    {
-      if (model.rae->config.calc_lbl) {
-        weights += lblprop->dump();
-        *error += lblprop->getError();
-      }
-      if (model.rae->config.calc_rae) {
-        weights += raeprop->dump();
-        *error += raeprop->getError();
-      }
-      if (model.rae->config.calc_uae) {
-        weights += uaeprop->dump();
-        *error += uaeprop->getError();
-      }
-    }
-
-#pragma omp master
-    {
-#pragma omp critical
-      {
-      if (model.calc_L2)  *error += model.rae->getLambdaCost(model.bools, model.lambdas);
-      if (model.calc_L2)  model.rae->addLambdaGrad(gradient_location,model.bools, model.lambdas);
-      }
-
-      if (model.rae->config.calc_lbl) lblprop->printInfo();
-      int outwidth = 16;
-      // cout << setw(outwidth) << "ERRORS";
-      // if (model.rae->config.calc_lbl) cout << setw(outwidth) << "A(lbl)";
-      // if (model.rae->config.calc_rae) cout << setw(outwidth) << "A(rae)";
-      // cout << endl;
-      // cout << setw(outwidth) << " ";
-      // if (model.rae->config.calc_lbl) cout << setw(outwidth) << lblprop->getError();
-      // if (model.rae->config.calc_rae) cout << setw(outwidth) << raeprop->getError();
-      // cout << endl;
-    }
-    if (model.rae->config.calc_lbl) delete lblprop;
-    if (model.rae->config.calc_rae) delete raeprop;
-    if (model.rae->config.calc_uae) delete uaeprop;
-  }
 }
 
-void computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
+void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
                           Real *gradient_location, int n, int iteration,
                           BProps &prop, Real* error) {
   int nA = modelA.rae->getThetaSize();
@@ -320,7 +261,7 @@ void computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
   }
 }
 
-void testModel(Model &model) {
+void OpenQATrainer::testModel(Model &model) {
 
   /***************************************************************************
    *             Define a couple of frequently needed variables              *
@@ -354,7 +295,7 @@ void testModel(Model &model) {
   // }
 }
 
-void setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
+void OpenQATrainer::setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
   number_vars += model.rae->theta_size_;
   vars = model.rae->theta_;
 

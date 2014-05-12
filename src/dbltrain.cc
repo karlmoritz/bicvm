@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 16:14:02 BST
+// Last Update: Mon 12 May 2014 17:46:24 BST
 
 // STL
 #include <iostream>
@@ -43,7 +43,10 @@
 #include "common/train_sgd.h"
 #include "common/train_adagrad.h"
 
-#include "common/train_update.h"
+#include "common/trainer.h"
+#include "common/openqa_trainer.h"
+#include "common/general_trainer.h"
+
 #include "common/finite_grad_check.h"
 
 
@@ -567,6 +570,8 @@ int main(int argc, char **argv)
   modelB.num_noise_samples = vm["noise"].as<int>();
 
   cout << "Dict size: " << modelA.rae->getDictSize() << " and " << modelB.rae->getDictSize() << endl;
+
+  modelA.trainer = new GeneralTrainer();
 
   /***************************************************************************
    *                              BFGS training                              *

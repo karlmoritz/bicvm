@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Mon 12 May 2014 16:39:57 BST
+// Last Update: Mon 12 May 2014 17:35:07 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -90,6 +90,7 @@ struct Sentence
 // Forward definition
 class RecursiveAutoencoderBase;
 class BackpropagatorBase;
+class Trainer;
 
 typedef vector<Sentence> TrainingCorpus;
 
@@ -149,6 +150,9 @@ struct Model
 
   Model* b; // Use this if models should be trained jointly
   Model* a; // Use this if model should only use a.fProp as measure
+
+  Trainer* trainer; // the trainer module (openqa or general). Used to call
+  // computecostandgrad function.
 
   // docmod is a pointer to a higher model that treats the sentences from this
   // model as words and the documents from this model as sentences.
