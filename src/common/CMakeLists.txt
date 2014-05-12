@@ -11,7 +11,8 @@ add_library(loaders SHARED load_alpino.cc load_ccg.cc load_doc.cc load_plain.cc
 target_link_libraries(loaders ${Boost_FILESYSTEM_LIBRARIES}
   ${Boost_SYSTEM_LIBRARIES})
 
-add_library(trainers SHARED finite_grad_check.cc train_adagrad.cc train_sgd.cc)
+add_library(trainers SHARED finite_grad_check.cc train_adagrad.cc train_sgd.cc
+  train_lbfgs.cc)
 
 add_library(dualtrain SHARED general_trainer.cc openqa_trainer.cc)
 target_link_libraries(dualtrain basemod)

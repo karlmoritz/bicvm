@@ -1,13 +1,10 @@
 // File: trainer.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 17:55:58 BST
+// Last Update: Mon 12 May 2014 18:00:14 BST
 
 #ifndef COMMON_TRAINER_H
 #define COMMON_TRAINER_H
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "shared_defs.h"

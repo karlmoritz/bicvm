@@ -1,13 +1,10 @@
 // File: general_trainer.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 17:27:27 BST
+// Last Update: Mon 12 May 2014 18:00:19 BST
 
 #ifndef COMMON_GENERAL_TRAINER_H
 #define COMMON_GENERAL_TRAINER_H
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "shared_defs.h"

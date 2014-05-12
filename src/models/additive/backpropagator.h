@@ -1,13 +1,10 @@
 // File: backpropagator.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Fri 18 Oct 2013 02:59:47 PM BST
+// Last Update: Mon 12 May 2014 18:02:00 BST
 
 #ifndef MODELS_ADDITIVE_BACKPROPAGATOR_H
 #define MODELS_ADDITIVE_BACKPROPAGATOR_H
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "../../common/shared_defs.h"

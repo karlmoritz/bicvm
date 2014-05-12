@@ -1,12 +1,11 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Mon 12 May 2014 17:43:53 BST
+// Last Update: Mon 12 May 2014 18:00:08 BST
 
 #ifndef COMMON_RECURSIVE_AUTOENCODER_H
 #define COMMON_RECURSIVE_AUTOENCODER_H
 
-/* #include <lbfgs.h> */
 #include <map>
 
 #include "common/shared_defs.h"

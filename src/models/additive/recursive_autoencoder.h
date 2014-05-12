@@ -1,13 +1,12 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Fri 18 Oct 2013 02:11:24 PM BST
+// Last Update: Mon 12 May 2014 18:01:54 BST
 
 #ifndef MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
 #define MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
 
 #include "../../common/recursive_autoencoder.h"
-#include <lbfgs.h>
 
 namespace additive {
 

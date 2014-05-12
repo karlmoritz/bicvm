@@ -1,13 +1,13 @@
 // File: train_lbfgs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-01-2013
-// Last Update: Fri 11 Oct 2013 03:53:14 PM BST
+// Last Update: Mon 12 May 2014 18:06:36 BST
 
 #ifndef COMMON_TRAIN_LBFGS_H
 #define COMMON_TRAIN_LBFGS_H
 
 // L-BFGS
-#include <lbfgs.h>
+/* #include <lbfgs.h> */
 
 // Local
 #include "shared_defs.h"

@@ -1,13 +1,12 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 17:27:21 BST
+// Last Update: Mon 12 May 2014 18:00:56 BST
 
 #include "openqa_trainer.h"
 
 #include <iostream>
 #include <random>
-#include <lbfgs.h>
 
 #include "shared_defs.h"
 #include "models.h"

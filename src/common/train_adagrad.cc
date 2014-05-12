@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 17:36:48 BST
+// Last Update: Mon 12 May 2014 18:00:02 BST
 
 // STL
 #include <iostream>
@@ -12,9 +12,6 @@
 // Boost
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "train_adagrad.h"

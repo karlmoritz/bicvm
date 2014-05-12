@@ -1,7 +1,7 @@
 // File: train_sgd.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 17:36:53 BST
+// Last Update: Mon 12 May 2014 18:00:05 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -20,9 +20,6 @@
 #include <boost/program_options/parsers.hpp>
 
 #include "shared_defs.h"
-
-// L-BFGS
-#include <lbfgs.h>
 
 // Local
 #include "train_sgd.h"
