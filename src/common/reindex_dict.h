@@ -1,7 +1,7 @@
 // File: reindex_dict.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 14-02-2013
-// Last Update: Fri 11 Oct 2013 03:53:14 PM BST
+// Last Update: Tue 13 May 2014 16:32:31 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -19,10 +19,10 @@
 #include "shared_defs.h"
 //#include "sentsim.h"
 
-class RecursiveAutoencoderBase;
+class DictionaryEmbeddings;
 
-RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae, TrainingCorpus& trainC);
-RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae, TrainingCorpus& trainC, TrainingCorpus& testC);
+DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& rae, TrainingCorpus& trainC);
+DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& rae, TrainingCorpus& trainC, TrainingCorpus& testC);
 //RecursiveAutoencoder reindex_dict(RecursiveAutoencoder& rae, SentSim::Corpus& trainC, SentSim::Corpus& testC);
 
 #endif /* end of include guard: REINDEX_DICT_H_YD7SAOWK */

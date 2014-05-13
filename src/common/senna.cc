@@ -1,11 +1,11 @@
 // File: senna.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 08-02-2013
-// Last Update: Fri 10 Jan 2014 05:02:57 PM GMT
+// Last Update: Tue 13 May 2014 15:19:43 BST
 
 // TODO(kmh): Note: This file is currently hacked to support subscripted
 // embeddings. This really should be moved somewhere else (into the actual
-// embeddings fiels for instance).
+// embeddings files for instance).
 
 #include <iostream>
 #include <fstream>
@@ -21,7 +21,7 @@
 
 using namespace std;
 
-  Senna::Senna(RecursiveAutoencoderBase& rae, int embeddings_type)
+  Senna::Senna(DictionaryEmbeddings& rae, int embeddings_type)
 : good_counter(0), bad_counter(0), rae(rae)
 {
   if (embeddings_type >= 0)

@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 18:00:56 BST
+// Last Update: Mon 12 May 2014 18:35:45 BST
 
 #include "openqa_trainer.h"
 
@@ -11,28 +11,25 @@
 #include "shared_defs.h"
 #include "models.h"
 
-void OpenQATrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
+void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* gradient_location,
                         int n, int iteration, BProps& props, Real* error)
 {
+  assert (props.propB != nullptr);
+
   props.propA->reset();
   if (props.propB != nullptr) { props.propB->reset(); }
   if (props.docprop != nullptr) { props.docprop->propA->reset(); props.docprop->propB->reset(); }
 
-  /******************************************************************************
-   *                Check for bimodel setup - otherwise proceed                 *
-   ******************************************************************************/
-  if (model.b != nullptr) {
-    computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
-    return;
-  }
-}
+  Model& modelB = *modelA.b;
 
-void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
-                          Real *gradient_location, int n, int iteration,
-                          BProps &prop, Real* error) {
   int nA = modelA.rae->getThetaSize();
   int nB = modelB.rae->getThetaSize();
   assert (n == nA + nB);
+
+  int dictsize_A = modelA.rae->getThetaDSize();
+  int dictsize_B = modelB.raw->getThetaDSize();
+  assert (dictsize_A == dictsize_B);
+
   // Update weights for model A
   WeightVectorType weightsA(gradient_location,nA);
   // Update weights for model B

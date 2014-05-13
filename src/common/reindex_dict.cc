@@ -1,66 +1,62 @@
 // File: reindex_dict.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 14-02-2013
-// Last Update: Fri 11 Oct 2013 03:52:53 PM BST
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Tue 13 May 2014 16:31:43 BST
 
 #include "reindex_dict.h"
 #include "recursive_autoencoder.h"
 
 
 /***************************************************************************
- *           Take an RAE and reindex it based on a given corpus            *
+ *           Take an de and reindex it based on a given corpus            *
  ***************************************************************************/
-RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae, TrainingCorpus& trainC)
+DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& de, TrainingCorpus& trainC)
 {
-
-  RecursiveAutoencoderBase* new_rae = rae.cloneEmpty();
+  DictionaryEmbeddings* new_de = new DictionaryEmbeddings();
   std::map<LabelID,LabelID> n2o_map;
 
   // A: Populate new dictionary based on old one
   for (auto instance = trainC.begin(); instance != trainC.end(); ++instance)
     for (auto word = instance->words.begin(); word != instance->words.end(); ++word)
     {
-      n2o_map[new_rae->dict_.id(rae.dict_.label(*word),true)] = *word;
-      *word = new_rae->dict_.id(rae.dict_.label(*word),true);
+      n2o_map[new_de->dict_.id(de.dict_.label(*word),true)] = *word;
+      *word = new_de->dict_.id(de.dict_.label(*word),true);
     }
-  new_rae->init(false,true);
-  new_rae->initFromWithDict(rae,n2o_map);
-  cout << "Reindexed dictionary from " << rae.getDictSize() << " entries down to " << new_rae->getDictSize() << "." << endl;
-  return new_rae;
+  // Allocate space for new dictionary. ZERO embedding for unknown words.
+  // (TODO: Think whether this should be random?).
+  new_de->init(false,true);
+  // Copy embeddings from old dictionary.
+  new_de->initFromDict(de,n2o_map);
+  cout << "Reindexed dictionary from " << de.getDictSize() << " entries down to " << new_de->getDictSize() << "." << endl;
+  return new_de;
 }
 
-RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae, TrainingCorpus& trainC, TrainingCorpus& testC)
+DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& de, TrainingCorpus& trainC, TrainingCorpus& testC)
 {
-
-  RecursiveAutoencoderBase* new_rae = rae.cloneEmpty();
+  DictionaryEmbeddings* new_de = new DictionaryEmbeddings();
   std::map<LabelID,LabelID> n2o_map;
 
   // A: Populate new dictionary based on old one
   for (auto instance = trainC.begin(); instance != trainC.end(); ++instance)
     for (auto word = instance->words.begin(); word != instance->words.end(); ++word)
     {
-      n2o_map[new_rae->dict_.id(rae.dict_.label(*word),true)] = *word;
-      *word = new_rae->dict_.id(rae.dict_.label(*word),true);
+      n2o_map[new_de->dict_.id(de.dict_.label(*word),true)] = *word;
+      *word = new_de->dict_.id(de.dict_.label(*word),true);
     }
 
   if (&testC != &trainC)
     for (auto instance = testC.begin(); instance != testC.end(); ++instance)
       for (auto word = instance->words.begin(); word != instance->words.end(); ++word)
       {
-        n2o_map[new_rae->dict_.id(rae.dict_.label(*word),true)] = *word;
-        *word = new_rae->dict_.id(rae.dict_.label(*word),true);
+        n2o_map[new_de->dict_.id(de.dict_.label(*word),true)] = *word;
+        *word = new_de->dict_.id(de.dict_.label(*word),true);
       }
 
-  new_rae->init(false,true);
-  new_rae->initFromWithDict(rae,n2o_map);
-  cout << "Reindexed dictionary from " << rae.getDictSize() << " entries down to " << new_rae->getDictSize() << "." << endl;
-  return new_rae;
+  // Allocate space for new dictionary. ZERO embedding for unknown words.
+  // (TODO: Think whether this should be random?).
+  new_de->init(false,true);
+  // Copy embeddings from old dictionary.
+  new_de->initFromDict(de,n2o_map);
+  cout << "Reindexed dictionary from " << de.getDictSize() << " entries down to " << new_de->getDictSize() << "." << endl;
+  return new_de;
 }

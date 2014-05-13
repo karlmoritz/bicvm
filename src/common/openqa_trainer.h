@@ -1,7 +1,7 @@
 // File: openqa_trainer.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 17:59:52 BST
+// Last Update: Mon 12 May 2014 18:30:47 BST
 
 #ifndef COMMON_OPENQA_TRAINER_H
 #define COMMON_OPENQA_TRAINER_H
@@ -19,16 +19,6 @@ class OpenQATrainer : public Trainer {
       Real *g,       // Put gradient here
       int n,                   // Number of variables
       int iteration, // Current iteration
-      BProps& prop,
-      Real* error);
-
-  void computeBiCostAndGrad(
-      Model &modelA,
-      Model &modelB,
-      const Real *x,
-      Real *gradient_location,
-      int n,
-      int iteration,
       BProps& prop,
       Real* error);
 

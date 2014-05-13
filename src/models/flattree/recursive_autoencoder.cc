@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Mon 21 Oct 2013 11:43:55 AM BST
+// Last Update: Tue 13 May 2014 15:10:47 BST
 
 #include "recursive_autoencoder.h"
 
@@ -36,24 +36,22 @@ SinglePropBase* RecursiveAutoencoder::getSingleProp(int sl, int nl, Real beta, B
   return spb;
 }
 
-void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
+void RecursiveAutoencoder::init(bool create_new_theta) {
   int word_width = config.word_representation_size;
   int label_width = config.label_class_size;
-  int dict_size = getDictSize();
-  theta_D_size_   = word_width * dict_size;
+
   theta_Wl_size_  = word_width * label_width;
   theta_Bl_size_  = label_width;
-  theta_size_ = theta_D_size_ + theta_Wl_size_ + theta_Bl_size_;
+  theta_size_ = theta_Wl_size_ + theta_Bl_size_;
+
   if (create_new_theta)
     theta_ = new Real[theta_size_];
-  theta_D_ = theta_;
-  theta_Wl_  = theta_D_ + theta_D_size_;
+
+  theta_Wl_  = theta_;
   theta_Bl_  = theta_Wl_ + theta_Wl_size_;
+
   Real* ptr = theta_;
   new (&Theta_Full) WeightVectorType(ptr, theta_size_);
-  if (init_words)
-    Theta_Full.setZero(); // just be safe (if we add down there instead of initializing)
-  new (&Theta_D) WeightVectorType(ptr, theta_D_size_); ptr += theta_D_size_;
   new (&Theta_Wl) WeightVectorType(ptr, theta_Wl_size_); ptr += theta_Wl_size_;
   new (&Theta_Bl) WeightVectorType(ptr, theta_Bl_size_); ptr += theta_Bl_size_;
   assert (ptr == theta_ + theta_size_);
@@ -69,11 +67,6 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
   std::normal_distribution<> d_snd(0,1);          // Matlab randn / standard normal distribution
   ptr = theta_;
 
-  // Initialize Domain
-  new (&D) WeightMatrixType(ptr, dict_size, word_width);
-  if (init_words) { for (int i = 0; i < theta_D_size_; ++i) Theta_D(i) = 0.1 * d_snd(gen); }
-  ptr += theta_D_size_;
-
   // Initialize Label Matrix and Weight
   Wl.clear();
   Wl.push_back(WeightMatrixType(ptr, label_width, word_width));
@@ -82,6 +75,7 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
     for (int i = 0; i < theta_Wl_size_; ++i) Theta_Wl(i) = dis1(gen);
   }
 
+  // Initialize Label Bias and Weight
   Bl.clear();
   Bl.push_back(WeightVectorType(ptr, label_width));
   ptr += label_width;
@@ -95,7 +89,6 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
 Real RecursiveAutoencoder::getLambdaCost(Bools l, Lambdas lambdas)
 {
   Real lcost = 0.0;
-  if (l.D)   lcost += lambdas.D   * 0.5 * Theta_D.cwiseProduct(Theta_D).sum();
   if (l.Wl)  lcost += lambdas.alpha_lbl * lambdas.Wl  * 0.5 * Theta_Wl.cwiseProduct(Theta_Wl).sum();
   if (l.Bl)  lcost += lambdas.alpha_lbl * lambdas.Bl  * 0.5 * Theta_Bl.cwiseProduct(Theta_Bl).sum();
   return lcost;
@@ -103,12 +96,6 @@ Real RecursiveAutoencoder::getLambdaCost(Bools l, Lambdas lambdas)
 
 void RecursiveAutoencoder::addLambdaGrad(Real* theta_data, Bools l, Lambdas lambdas)
 {
-  if (l.D)
-  {
-    WeightVectorType X = WeightVectorType(theta_data,theta_D_size_);
-    X += (Theta_D * lambdas.D);
-  }
-  theta_data += theta_D_size_;
   if (l.Wl)
   {
     WeightVectorType X = WeightVectorType(theta_data,theta_Wl_size_);
@@ -126,7 +113,6 @@ void RecursiveAutoencoder::addLambdaGrad(Real* theta_data, Bools l, Lambdas lamb
 void RecursiveAutoencoder::setIncrementalCounts(Counts *counts, Real *&vars, int &number)
 {
   vars = theta_;
-  counts->D   = theta_D_size_;
   counts->Wl  = counts->D + theta_Wl_size_;
   counts->Bl  = counts->Wl  + theta_Bl_size_;
   number = theta_size_;
