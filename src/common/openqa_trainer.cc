@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 14 May 2014 09:22:23 BST
+// Last Update: Wed 14 May 2014 16:22:14 BST
 
 #include "openqa_trainer.h"
 
@@ -11,52 +11,54 @@
 #include "shared_defs.h"
 #include "models.h"
 
-void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* gradient_location,
+void OpenQATrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
                         int n, int iteration, BProps& props, Real* error)
 {
-  assert (props.propB != nullptr);
-
   props.propA->reset();
   if (props.propB != nullptr) { props.propB->reset(); }
   if (props.docprop != nullptr) { props.docprop->propA->reset(); props.docprop->propB->reset(); }
+  computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
+}
 
-  Model& modelB = *modelA.b;
+void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
+                          Real *gradient_location, int n, int iteration,
+                          BProps &prop, Real* error) {
 
   int modsize_A = modelA.rae->getThetaSize();
   int modsize_B = modelB.rae->getThetaSize();
   int dictsize_A = modelA.rae->de_->getThetaSize();
-  int dictsize_B = modelB.rae->de_->getThetaSize();
-  // assert (dictsize_A == dictsize_B);
-  assert (n == nA + nB + dictsize_A + dictsize_B);
 
   // Create gradient vectors for modA, modB, dictA, dictB
   Real* ptr = gradient_location;
   WeightVectorType weightsA(ptr,modsize_A); ptr += modsize_A;
   WeightVectorType weightsB(ptr,modsize_B); ptr += modsize_B;
   WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
-  WeightVectorType dweightsB(ptr,dictsize_B); //ptr += dictsize_B;
+  assert (gradient_location + n == ptr);
 
 #pragma omp single
   {
     weightsA.setZero();
     weightsB.setZero();
     dweightsA.setZero();
-    dweightsB.setZero();
   }
 
   WeightMatrixType docgrad_AD(0,0,0);
   WeightMatrixType docgrad_BD(0,0,0);
   if (modelA.docmod != nullptr) {
-    int nC = modelA.docmod->rae->getThetaSize();
+    int modsize_C = modelA.docmod->rae->getThetaSize();
+    int modsize_D = modelB.docmod->rae->getThetaSize();
+    int dictsize_C = modelA.docmod->rae->de_->getThetaSize();
+
     int word_width = modelA.rae->config.word_representation_size;
     int docAdict_size = modelA.docmod->rae->getDictSize();
     int docBdict_size = modelB.docmod->rae->getDictSize();
     // Bonus weights even further back. Use these for pulling docmodgrads.
-    new (&docgrad_AD) WeightMatrixType(gradient_location+nA+nB,
-                                       docAdict_size, word_width);
-    new (&docgrad_BD) WeightMatrixType(gradient_location+nA+nB+nC,
-                                       docBdict_size, word_width);
+    // [modA,modB,dicA,dicB,modC,modD,dicC,dicB]
+    ptr += modsize_C + modsize_D;
+    new (&docgrad_AD) WeightMatrixType(ptr, docAdict_size, word_width);
+    ptr += dictsize_C;
   }
+  assert (gradient_location + n == ptr);
 
   Real gamma = modelA.gamma;
 
@@ -231,8 +233,9 @@ void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* grad
     *error += prop.propA->getError();
     *error += prop.propB->getError();
 
-    weightsA += prop.propA->dump();
-    weightsB += prop.propB->dump();
+    weightsA += prop.propA->dumpWeights();
+    weightsB += prop.propB->dumpWeights();
+    dweightsA += prop.propA->dumpDict();
   }
 
 #pragma omp single
@@ -244,19 +247,28 @@ void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* grad
       // would require pushing Real* data into bpropbase.
     if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
     if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
-    if (modelA.calc_L2) modelA.rae->addLambdaGrad(gradient_location, modelA.bools, modelA.lambdas);
-    if (modelB.calc_L2) modelB.rae->addLambdaGrad(gradient_location+nA, modelB.bools, modelA.lambdas);
+    if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
+    if (modelB.calc_L2) *error += modelB.rae->de_->getLambdaCost(modelB.bools, modelA.lambdas);
+
+    ptr = gradient_location;
+    if (modelA.calc_L2) modelA.rae->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+    ptr += modsize_A;
+    if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
+    ptr += modsize_B;
+    if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+    ptr += dictsize_A;
     }
   }
 
   // If we're at the final loop (in case of minibatch updates) we now calculate
   // the gradients for the document level model.
   if (modelA.to == modelA.corpus.size() && modelA.docmod != nullptr) {
-    int nC = modelA.docmod->rae->getThetaSize();
-    int nD = modelB.docmod->rae->getThetaSize();
-    computeBiCostAndGrad(*modelA.docmod, *modelB.docmod, x,
-        gradient_location+nA+nB, nC+nD, 1,
-        *prop.docprop, error);
+    int docmodsize = modelA.docmod->rae->getThetaSize()
+      + modelB.docmod->rae->getThetaSize()
+      + modelA.docmod->rae->de_->getThetaSize()
+      + modelB.docmod->rae->de_->getThetaSize();
+    computeBiCostAndGrad(*modelA.docmod, *modelB.docmod, x, ptr, docmodsize, 1,
+                         *prop.docprop, error);
   }
 }
 
@@ -288,19 +300,11 @@ void OpenQATrainer::testModel(Model &model) {
     }
     delete propagator;
   }
-// #pragma omp master
-  // {
-    // cout << "  " << correctly_classified_sent << "/" << num_sentences << " ";
-  // }
 }
 
 void OpenQATrainer::setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
-  number_vars += model.rae->theta_size_;
+  number_vars += model.rae->getThetaSize();
+  number_vars += model.b->rae->getThetaSize();
+  number_vars += model.rae->de_->getThetaSize();
   vars = model.rae->theta_;
-
-  if (model.b != nullptr)
-  {
-    number_vars += model.b->rae->theta_size_;
-  }
-
 }

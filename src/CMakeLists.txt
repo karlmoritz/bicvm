@@ -76,7 +76,7 @@ add_library(pugi SHARED pugi/pugixml.cpp)
 #############################################
 
 set(EXECUTABLES dbltrain doctrain extract-vectors extract-comp-vectors
-  ted-to-libsvm)
+  ted-to-libsvm qqtrain)
 foreach(f ${EXECUTABLES})
   add_executable(${f} ${f}.cc)
   target_link_libraries(${f} basics loaders trainers basemod dualtrain modadditive modflattree pugi)

@@ -8,14 +8,14 @@ add_library(basemod SHARED recursive_autoencoder.cc singlepropbase.cc
 add_library(basics SHARED fast_math.cc finetune_classifier.cc reindex_dict.cc
   senna.cc shared_defs.cc utils.cc)
 add_library(loaders SHARED load_alpino.cc load_ccg.cc load_doc.cc load_plain.cc
-  load_stanford.cc)
+  load_stanford.cc load_qq.cc)
 target_link_libraries(loaders ${Boost_FILESYSTEM_LIBRARIES}
   ${Boost_SYSTEM_LIBRARIES})
 
 add_library(trainers SHARED finite_grad_check.cc train_adagrad.cc train_sgd.cc
   train_lbfgs.cc)
 
-add_library(dualtrain SHARED general_trainer.cc) # openqa_trainer.cc)
+add_library(dualtrain SHARED general_trainer.cc openqa_trainer.cc)
 target_link_libraries(dualtrain basemod)
 
 # backpropagatorbase.cc   finite_grad_check.cc  load_doc.cc       recursive_autoencoder.cc  shared_defs.cc     train_lbfgs.cc   train_vsgd.cc
