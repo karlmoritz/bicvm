@@ -1,7 +1,7 @@
 // File: dictionary_embeddings.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 12-05-2014
-// Last Update: Wed 14 May 2014 13:39:45 BST
+// Last Update: Wed 14 May 2014 14:01:33 BST
 
 #include <iostream>
 #include <fstream>
@@ -36,7 +36,7 @@ void DictionaryEmbeddings::init(bool init_words, bool create_new_theta) {
     std::mt19937 gen(0);
     std::normal_distribution<> d_snd(0,1); // Matlab randn / standard normal distribution
     for (int i = 0; i < theta_size_; ++i)
-      Theta(i) = 0.1;// * d_snd(gen);
+      Theta(i) = 0.1 * d_snd(gen);
   }
 }
 

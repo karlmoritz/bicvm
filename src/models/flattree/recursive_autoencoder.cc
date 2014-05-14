@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 14 May 2014 11:30:55 BST
+// Last Update: Wed 14 May 2014 14:00:22 BST
 
 #include "recursive_autoencoder.h"
 
@@ -72,7 +72,7 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
   Wl.push_back(WeightMatrixType(ptr, label_width, word_width));
   ptr += label_width*word_width;
   if (init_words) {
-    for (int i = 0; i < theta_Wl_size_; ++i) Theta_Wl(i) = dis1(gen);
+    for (int i = 1; i < theta_Wl_size_; ++i) Theta_Wl(i) = dis1(gen);
   }
 
   // Initialize Label Bias and Weight
