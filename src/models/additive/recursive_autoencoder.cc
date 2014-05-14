@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 14 May 2014 14:00:33 BST
+// Last Update: Wed 14 May 2014 14:21:18 BST
 
 #include "recursive_autoencoder.h"
 
@@ -115,7 +115,7 @@ void RecursiveAutoencoder::setIncrementalCounts(Counts *counts, Real *&vars, int
   vars = theta_;
   counts->Wl  = theta_Wl_size_;
   counts->Bl  = counts->Wl  + theta_Bl_size_;
-  number = theta_size_ + getThetaDSize();
+  number = theta_size_;
 }
 
 }  // namespace additive

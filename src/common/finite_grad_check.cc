@@ -1,7 +1,7 @@
 // File: finite_grad_check.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 13:23:11 BST
+// Last Update: Wed 14 May 2014 14:34:20 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -41,11 +41,15 @@ void finite_grad_check(Model &model, Lambdas lambdas)
   model.rae->setIncrementalCounts(&counts, vars, number_vars);
   model.lambdas = lambdas;
 
-  WeightVectorType theta(vars,number_vars);
+  int number_dA = model.rae->getThetaDSize();
+  int all_vars = number_vars + number_dA;
+
+  WeightVectorType theta(vars,all_vars);
 
   int extended_vars = number_vars;
   if (model.docmod != nullptr) {
     extended_vars += model.docmod->rae->getThetaSize();
+    extended_vars += model.docmod->rae->getThetaDSize();
   }
   Real* data1 = new Real[extended_vars]();
   Real* data2 = new Real[extended_vars]();
@@ -53,22 +57,21 @@ void finite_grad_check(Model &model, Lambdas lambdas)
 
   BProps props(model);
   Real error1 = 0.0, error2;
-  model.trainer->computeCostAndGrad(model,nullptr,data1,number_vars,0,props,&error1);
+  model.trainer->computeCostAndGrad(model,nullptr,data1,all_vars,0,props,&error1);
 
   modvars<Real> dists;
   dists.init();
   Real dist = 0.0;
   Real delta = 1.0e-7;
 
-  for (int i=0;i<number_vars;++i)
+  for (int i=0;i<all_vars;++i)
   {
     theta[i] += delta;
     error2 = 0.0;
-    model.trainer->computeCostAndGrad(model,nullptr,data2,number_vars,0,props,&error2);
+    model.trainer->computeCostAndGrad(model,nullptr,data2,all_vars,0,props,&error2);
     Real xdev = (error2 - error1) / delta;
     theta[i] -= delta;
-    if (i < counts.D)   { dists.D += abs(grad[i] - xdev);   cout << "D   "; }
-    else if (i < counts.U)  { dists.U += abs(grad[i] - xdev);  cout << "U  "; }
+    if (i < counts.U)  { dists.U += abs(grad[i] - xdev);  cout << "U  "; }
     else if (i < counts.V)  { dists.V += abs(grad[i] - xdev);  cout << "V  "; }
     else if (i < counts.W)  { dists.W += abs(grad[i] - xdev);  cout << "W  "; }
     else if (i < counts.A)  { dists.A += abs(grad[i] - xdev);  cout << "A  "; }
@@ -79,7 +82,8 @@ void finite_grad_check(Model &model, Lambdas lambdas)
     else if (i < counts.Wf)  { dists.Wf += abs(grad[i] - xdev);  cout << "Wf  "; }
     else if (i < counts.Wl)  { dists.Wl += abs(grad[i] - xdev);  cout << "Wl  "; }
     else if (i < counts.Bl)  { dists.Bl += abs(grad[i] - xdev);  cout << "Bl  "; }
-    else  { dists.Bl += abs(grad[i] - xdev);  cout << "XX  "; }
+    else if (i < (number_vars + number_dA))   { dists.D += abs(grad[i] - xdev);   cout << "D   "; }
+    else  { cout << "ERROR  "; assert(false); }
 
     //template<> void modvars<int>::init() { D = 0; U = 0; V = 0; W = 0; A = 0; Wd = 0; Wdr = 0; Bd = 0; Bdr = 0; Wf = 0; Wl = 0; Bl = 0; alpha_rae = 0; alpha_lbl = 0; }
     cout << i << ": " << grad[i] << " .. " << " vs " << (xdev) << "   " << error2 << " - " << error1 << "[" << theta[i] << "]" << endl;
@@ -115,7 +119,9 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   modvars<int> countsB;
   model.b->rae->setIncrementalCounts(&countsB, varsX, number_varsB);
 
-  int double_vars = number_vars + number_varsB;
+  int number_dA = model.rae->getThetaDSize();
+  int number_dB = model.b->rae->getThetaDSize();
+  int double_vars = number_vars + number_varsB + number_dA + number_dB;
 
   // cout.precision(15);
 
@@ -124,6 +130,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   if (model.docmod != nullptr) {
     extended_vars += model.docmod->rae->getThetaSize() +
       model.b->docmod->rae->getThetaSize();
+      model.b->docmod->rae->getThetaDSize();
   }
   Real* data1 = new Real[extended_vars]();
   Real* data2 = new Real[extended_vars]();
@@ -201,8 +208,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     Real xdev = (Real)((error2 - error1) / delta);
     theta[i] -= delta;
     j = i - number_vars;
-    if (i < counts.D)   { dists.D += abs(grad[i] - xdev);   cout << "D   "; }
-    else if (i < counts.U)  { dists.U += abs(grad[i] - xdev);  cout << "U  "; }
+    if (i < counts.U)  { dists.U += abs(grad[i] - xdev);  cout << "U  "; }
     else if (i < counts.V)  { dists.V += abs(grad[i] - xdev);  cout << "V  "; }
     else if (i < counts.W)  { dists.W += abs(grad[i] - xdev);  cout << "W  "; }
     else if (i < counts.A)  { dists.A += abs(grad[i] - xdev);  cout << "A  "; }
@@ -214,7 +220,6 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     else if (i < counts.Wl)  { dists.Wl += abs(grad[i] - xdev);  cout << "Wl  "; }
     else if (i < counts.Bl)  { dists.Bl += abs(grad[i] - xdev);  cout << "Bl  "; }
 
-    else if (j < countsB.D)   { distsB.D += abs(grad[i] - xdev);   cout << "2D   "; }
     else if (j < countsB.U)  { distsB.U += abs(grad[i] - xdev);  cout << "2U  "; }
     else if (j < countsB.V)  { distsB.V += abs(grad[i] - xdev);  cout << "2V  "; }
     else if (j < countsB.W)  { distsB.W += abs(grad[i] - xdev);  cout << "2W  "; }
@@ -227,7 +232,10 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     else if (j < countsB.Wl)  { distsB.Wl += abs(grad[i] - xdev);  cout << "2Wl  "; }
     else if (j < countsB.Bl)  { distsB.Bl += abs(grad[i] - xdev);  cout << "2Bl  "; }
 
-    else  { dists.Bl += abs(grad[i] - xdev);  cout << "XXX  "; }
+    else if (j < (number_varsB + number_dA))   { dists.D += abs(grad[i] - xdev);   cout << "D   "; }
+    else if (j < (number_varsB + number_dA + number_dB))   { distsB.D += abs(grad[i] - xdev);   cout << "2D  "; }
+
+    else  { cout << "ERROR  " << endl; assert(false); }
     //template<> void modvars<int>::init() { D = 0; U = 0; V = 0; W = 0; A = 0; Wd = 0; Wdr = 0; Bd = 0; Bdr = 0; Wf = 0; Wl = 0; Bl = 0; alpha_rae = 0; alpha_lbl = 0; }
     cout << i << ": " << grad[i] << " vs " << (xdev) << "   " << error2 << " - " << error1 << endl;
 
