@@ -1,5 +1,5 @@
 bicvm
-=====
+===
 
 BiCVM Code
 
@@ -13,3 +13,13 @@ This code require several libraries in order to run:
 * libSVM (http://www.chokkan.org/software/liblbfgs/)
 * Boost
 * Eigen
+
+
+To Do
+====
+
+This is development code and not fully functional. Currently, dbltrain should
+behave as expected; the other executables won't compile and still need to be
+ported to the refactored codebase.
+
+Dictionary/Model initialisation could be cleaned up.
