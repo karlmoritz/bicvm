@@ -1,7 +1,7 @@
 // File: shared_defs.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-05-2013
-// Last Update: Thu 02 Jan 2014 06:45:35 PM GMT
+// Last Update: Wed 14 May 2014 11:17:38 BST
 
 #include "shared_defs.h"
 #include "recursive_autoencoder.h"
@@ -43,9 +43,9 @@ Model::Model(RecursiveAutoencoderBase* rae_, TrainingCorpus corp) :
   }
 
 BProps::BProps(Model& a) {
-  propA = a.rae->getBackpropagator(a,a.rae->getThetaSize());
+  propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
   if (a.b != nullptr) {
-    propB = (*a.b).rae->getBackpropagator(*a.b,a.b->rae->getThetaSize());
+    propB = (*a.b).rae->getBackpropagator(*a.b,a.b->rae->getThetaPlusDictSize());
     if (a.docmod != nullptr) {
       docprop = new BProps(*a.docmod, *(a.b->docmod));
     } else {
@@ -54,12 +54,12 @@ BProps::BProps(Model& a) {
   }
 }
 BProps::BProps(Model& a, Model& b) {
-  propA = a.rae->getBackpropagator(a,a.rae->getThetaSize());
-  propB = b.rae->getBackpropagator(b,b.rae->getThetaSize());
+  propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
+  propB = b.rae->getBackpropagator(b,b.rae->getThetaPlusDictSize());
   docprop = nullptr;
 }
 BProps::BProps(Model& a, Model& b, Model& c, Model& d) {
-  propA = a.rae->getBackpropagator(a,a.rae->getThetaSize());
-  propB = b.rae->getBackpropagator(b,b.rae->getThetaSize());
+  propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
+  propB = b.rae->getBackpropagator(b,b.rae->getThetaPlusDictSize());
   docprop = new BProps(c,d);
 }

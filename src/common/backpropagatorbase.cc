@@ -1,7 +1,7 @@
 // File: backpropagatorbase.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 18-06-2013
-// Last Update: Mon 06 Jan 2014 05:47:05 PM GMT
+// Last Update: Wed 14 May 2014 09:59:15 BST
 
 #include "backpropagatorbase.h"
 
@@ -9,7 +9,7 @@
 
 BackpropagatorBase::BackpropagatorBase (RecursiveAutoencoderBase* rae,
                                         const Model &model)
-  : rae_(rae), model(model), weights(0,0), error_(0.0),
+  : rae_(rae), model(model), weights(0,0), dict_weights(0,0), error_(0.0),
   count_nodes_(0), count_words_(0),
   correctly_classified_sent(0), zero_should_be_one(0), zero_should_be_zero(0),
   one_should_be_zero(0), one_should_be_one(0), is_a_zero(0), is_a_one(0) {
@@ -124,7 +124,8 @@ void BackpropagatorBase::printInfo() {
   cout << endl;
 }
 
-WeightVectorType BackpropagatorBase::dump() { return weights; }
+WeightVectorType BackpropagatorBase::dumpWeights() { return weights; }
+WeightVectorType BackpropagatorBase::dumpDict() { return dict_weights; }
 Real BackpropagatorBase::getError() { return error_; }
 
 void BackpropagatorBase::addError(Real i) {

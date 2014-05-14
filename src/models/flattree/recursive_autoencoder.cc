@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Tue 13 May 2014 15:10:47 BST
+// Last Update: Wed 14 May 2014 11:30:55 BST
 
 #include "recursive_autoencoder.h"
 
@@ -36,7 +36,7 @@ SinglePropBase* RecursiveAutoencoder::getSingleProp(int sl, int nl, Real beta, B
   return spb;
 }
 
-void RecursiveAutoencoder::init(bool create_new_theta) {
+void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
   int word_width = config.word_representation_size;
   int label_width = config.label_class_size;
 
@@ -113,9 +113,9 @@ void RecursiveAutoencoder::addLambdaGrad(Real* theta_data, Bools l, Lambdas lamb
 void RecursiveAutoencoder::setIncrementalCounts(Counts *counts, Real *&vars, int &number)
 {
   vars = theta_;
-  counts->Wl  = counts->D + theta_Wl_size_;
+  counts->Wl  = theta_Wl_size_;
   counts->Bl  = counts->Wl  + theta_Bl_size_;
-  number = theta_size_;
+  number = theta_size_ + getThetaDSize();
 }
 
 }  // namespace flattree

@@ -1,7 +1,7 @@
 // File: finite_grad_check.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 17:59:58 BST
+// Last Update: Wed 14 May 2014 13:23:11 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -79,6 +79,7 @@ void finite_grad_check(Model &model, Lambdas lambdas)
     else if (i < counts.Wf)  { dists.Wf += abs(grad[i] - xdev);  cout << "Wf  "; }
     else if (i < counts.Wl)  { dists.Wl += abs(grad[i] - xdev);  cout << "Wl  "; }
     else if (i < counts.Bl)  { dists.Bl += abs(grad[i] - xdev);  cout << "Bl  "; }
+    else  { dists.Bl += abs(grad[i] - xdev);  cout << "XX  "; }
 
     //template<> void modvars<int>::init() { D = 0; U = 0; V = 0; W = 0; A = 0; Wd = 0; Wdr = 0; Bd = 0; Bdr = 0; Wf = 0; Wl = 0; Bl = 0; alpha_rae = 0; alpha_lbl = 0; }
     cout << i << ": " << grad[i] << " .. " << " vs " << (xdev) << "   " << error2 << " - " << error1 << "[" << theta[i] << "]" << endl;
@@ -173,7 +174,7 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   for (int i=0;i<double_vars;++i) {
     t1 = t2;
     theta[i] += delta;
-    for (auto i=0; i < extended_vars; ++i) data2[i] = data3[i];
+    for (auto r=0; r < extended_vars; ++r) data2[r] = data3[r];
 #pragma omp parallel
     {
       BProps props(model);
@@ -225,6 +226,8 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
     else if (j < countsB.Wf)  { distsB.Wf += abs(grad[i] - xdev);  cout << "2Wf  "; }
     else if (j < countsB.Wl)  { distsB.Wl += abs(grad[i] - xdev);  cout << "2Wl  "; }
     else if (j < countsB.Bl)  { distsB.Bl += abs(grad[i] - xdev);  cout << "2Bl  "; }
+
+    else  { dists.Bl += abs(grad[i] - xdev);  cout << "XXX  "; }
     //template<> void modvars<int>::init() { D = 0; U = 0; V = 0; W = 0; A = 0; Wd = 0; Wdr = 0; Bd = 0; Bdr = 0; Wf = 0; Wl = 0; Bl = 0; alpha_rae = 0; alpha_lbl = 0; }
     cout << i << ": " << grad[i] << " vs " << (xdev) << "   " << error2 << " - " << error1 << endl;
 

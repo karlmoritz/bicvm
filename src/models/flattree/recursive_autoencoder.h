@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Tue 13 May 2014 15:03:50 BST
+// Last Update: Wed 14 May 2014 10:32:50 BST
 
 #ifndef MODELS_FLATTREE_RECURSIVE_AUTOENCODER_H
 #define MODELS_FLATTREE_RECURSIVE_AUTOENCODER_H
@@ -31,7 +31,7 @@ class RecursiveAutoencoder : public RecursiveAutoencoderBase {
   friend class SingleProp;
   friend class Backpropagator;
  private:
-  void init(bool create_new_theta=true);
+  void init(bool init_words, bool create_new_theta);
 
   WeightMatricesType    Wl;     // Label (nxl)
   WeightVectorsType     Bl;     // Bias  (l)

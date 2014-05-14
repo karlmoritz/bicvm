@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 12 May 2014 18:35:45 BST
+// Last Update: Wed 14 May 2014 09:22:23 BST
 
 #include "openqa_trainer.h"
 
@@ -22,23 +22,26 @@ void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* grad
 
   Model& modelB = *modelA.b;
 
-  int nA = modelA.rae->getThetaSize();
-  int nB = modelB.rae->getThetaSize();
-  assert (n == nA + nB);
+  int modsize_A = modelA.rae->getThetaSize();
+  int modsize_B = modelB.rae->getThetaSize();
+  int dictsize_A = modelA.rae->de_->getThetaSize();
+  int dictsize_B = modelB.rae->de_->getThetaSize();
+  // assert (dictsize_A == dictsize_B);
+  assert (n == nA + nB + dictsize_A + dictsize_B);
 
-  int dictsize_A = modelA.rae->getThetaDSize();
-  int dictsize_B = modelB.raw->getThetaDSize();
-  assert (dictsize_A == dictsize_B);
-
-  // Update weights for model A
-  WeightVectorType weightsA(gradient_location,nA);
-  // Update weights for model B
-  WeightVectorType weightsB(gradient_location+nA,nB);
+  // Create gradient vectors for modA, modB, dictA, dictB
+  Real* ptr = gradient_location;
+  WeightVectorType weightsA(ptr,modsize_A); ptr += modsize_A;
+  WeightVectorType weightsB(ptr,modsize_B); ptr += modsize_B;
+  WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
+  WeightVectorType dweightsB(ptr,dictsize_B); //ptr += dictsize_B;
 
 #pragma omp single
   {
     weightsA.setZero();
     weightsB.setZero();
+    dweightsA.setZero();
+    dweightsB.setZero();
   }
 
   WeightMatrixType docgrad_AD(0,0,0);
@@ -80,7 +83,7 @@ void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* grad
         // If docmod, pass the sentence vector into the docmod model now.
         // sent_id is unique, so parallel access should not be an issue.
         int sent_id = modelB.corpus[j].id;
-        modelB.docmod->rae->D.row(sent_id) = rootB;
+        modelB.docmod->rae->de_->D.row(sent_id) = rootB;
       }
 
       // The "normal" biprop: backprop self given the other root and vice versa
@@ -141,7 +144,7 @@ void OpenQATrainer::computeCostAndGrad( Model& modelA, const Real* x, Real* grad
       if (modelA.docmod != nullptr) {
         // If docmod, pass the sentence vector into the docmod model now.
         int sent_id = modelA.corpus[j].id;
-        modelA.docmod->rae->D.row(sent_id) = rootA; // using sent_id directly to store correct row.
+        modelA.docmod->rae->de_->D.row(sent_id) = rootA; // using sent_id directly to store correct row.
       }
 
       // Do the "normal" biprop: backprop self given the other root and vice

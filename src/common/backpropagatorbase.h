@@ -1,7 +1,7 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Mon 12 May 2014 18:01:02 BST
+// Last Update: Wed 14 May 2014 09:41:45 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
@@ -32,7 +32,8 @@ public:
   Real getError();
   void addError(Real i);
   void reset() { error_ = 0; weights.setZero(); } // subsequently add counts from below, too
-  WeightVectorType dump();
+  WeightVectorType dumpWeights();
+  WeightVectorType dumpDict();
   void printInfo();
 
   // Propagation Functions.
@@ -71,6 +72,7 @@ protected:
   RecursiveAutoencoderBase* rae_;
   const Model& model;
   WeightVectorType weights;
+  WeightVectorType dict_weights;
   Real error_;
   int word_width;
   int dict_size;

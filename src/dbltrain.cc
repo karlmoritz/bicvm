@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 13 May 2014 16:40:51 BST
+// Last Update: Wed 14 May 2014 13:10:08 BST
 
 // STL
 #include <iostream>
@@ -317,7 +317,6 @@ int main(int argc, char **argv)
   bool fonly      = false; //vm["fonly"].as<bool>();
 
   Real eta       = vm["eta"].as<Real>();
-  cout << "eta is: " << eta << endl;
   Real ftceta    = vm["ftceta"].as<Real>();
   Real alpha     = vm["alpha"].as<Real>();
   Real gamma     = vm["gamma"].as<Real>();
@@ -382,8 +381,8 @@ int main(int argc, char **argv)
 
   RecursiveAutoencoderBase& raeA = *raeptrA;
   RecursiveAutoencoderBase& raeB = *raeptrB;
-  DictionaryEmbeddings deA;
-  DictionaryEmbeddings deB;
+  DictionaryEmbeddings deA(config.word_representation_size);
+  DictionaryEmbeddings deB(config.word_representation_size);
 
   if (vm.count("model1-in"))
   {
@@ -493,9 +492,9 @@ int main(int argc, char **argv)
 
     // (Re)create dictionary space and add senna embeddings.
     if (create_new_dict_A) {
-      deA.createTheta(true); sennaA.applyEmbeddings(); }
+      raeA.createTheta(true); deA.createTheta(true); sennaA.applyEmbeddings(); }
     if (create_new_dict_B) {
-      deB.createTheta(true); sennaB.applyEmbeddings(); }
+      raeB.createTheta(true); deB.createTheta(true); sennaB.applyEmbeddings(); }
   }
 
   /***************************************************************************
@@ -504,9 +503,11 @@ int main(int argc, char **argv)
 
   // Reindexing should only have an effect IF we load an existing model and a
   // new corpus.
-  newDeA = reindex_dict(deA,modelA.corpus);
-  newDeB = reindex_dict(deB,modelB.corpus);
+  // DictionaryEmbeddings newDeA = reindex_dict(deA,modelA.corpus);
+  // DictionaryEmbeddings newDeB = reindex_dict(deB,modelB.corpus);
 
+  modelA.rae = &raeA;
+  modelB.rae = &raeB;
   // Hacky: alphas directly into model.
   modelA.rae->alpha_rae = lambdas.alpha_rae;
   modelA.rae->alpha_lbl = lambdas.alpha_lbl;
@@ -514,12 +515,19 @@ int main(int argc, char **argv)
   modelB.rae->alpha_lbl = lambdas.alpha_lbl;
 
   // Associate dictionaries with RAEs.
-  modelA.rae.de_ = &newDeA;
-  modelB.rae.de_ = &newDeB;
+  // modelA.rae->de_ = &newDeA;
+  // modelB.rae->de_ = &newDeB;
+  modelA.rae->de_ = reindex_dict(deA,modelA.corpus);
+  modelB.rae->de_ = reindex_dict(deB,modelB.corpus);
 
-  delete &raeA;
-  delete &raeB;
+  cout << "Addresses for A: " << &(modelA.rae->de_) << endl;
+  cout << "Addresses for B: " << &(modelB.rae->de_) << endl;
+  cout << "Sizes: " << modelA.rae->de_->getThetaSize() << endl;
+  cout << "Sizes: " << modelB.rae->de_->getThetaSize() << endl;
+  modelB.rae->de_->debugInfo();
+
   // TODO: Delete the old dictionary (deA,deB)
+
 
   int ab_size = modelA.rae->getThetaSize()
               + modelB.rae->getThetaSize()
@@ -527,12 +535,12 @@ int main(int argc, char **argv)
               + modelB.rae->de_->getThetaSize();
   int offset = 0;
   Real* theta = new Real[ab_size]();
-  modelA.rae->finalizeSpecific(theta + offset);
+  modelA.rae->moveToAddress(theta + offset);
   offset += modelA.rae->getThetaSize();
+  modelB.rae->moveToAddress(theta + offset);
+  offset += modelB.rae->getThetaSize();
   modelA.rae->de_->moveToAddress(theta + offset);
   offset += modelA.rae->de_->getThetaSize();
-  modelB.rae->finalizeSpecific(theta + offset);
-  offset += modelB.rae->getThetaSize();
   modelB.rae->de_->moveToAddress(theta + offset);
 
   // Sets some model parameters such as maximum sentence and node length to
@@ -591,6 +599,7 @@ int main(int argc, char **argv)
   else if (config.training_method == 2)
   {
     cout << "Finite Gradient Check" << endl;
+    // train_adagrad(modelA,3,eta,nullptr,batches,lambdas,l1);
     finite_bigrad_check(modelA,lambdas);
   }
   else if (config.training_method == 3)
@@ -612,12 +621,12 @@ int main(int argc, char **argv)
   {
     std::ofstream ofs(vm["model1-out"].as<string>());
     boost::archive::text_oarchive oa(ofs);
-    oa << *(modelA.rae) << *(modelA.rae.de_);
+    oa << *(modelA.rae) << *(modelA.rae->de_);
   }
 
   {
     std::ofstream ofs(vm["model2-out"].as<string>());
     boost::archive::text_oarchive oa(ofs);
-    oa << *(modelB.rae) << *(modelB.rae.de_);
+    oa << *(modelB.rae) << *(modelB.rae->de_);
   }
 }

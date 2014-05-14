@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Mon 06 Jan 2014 05:47:39 PM GMT
+// Last Update: Wed 14 May 2014 12:37:37 BST
 
 #include <cmath>
 
@@ -57,7 +57,7 @@ void SingleProp::loadWithSentence(const Sentence &t) {
   SinglePropBase::loadWithSentence(t);
   D[0].setZero();
   Delta_D[0].setZero();
-  // D[i] = rae_->D.row(instance_->words[node]);
+  // D[i] = rae_->de_->D.row(instance_->words[node]);
 }
 
 void SingleProp::passDataLink(Real* data, int size) {
@@ -66,7 +66,7 @@ void SingleProp::passDataLink(Real* data, int size) {
     Real *ptr = data;
     new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
     // grad_D.setZero();
-    ptr += rae_->theta_D_size_;
+    ptr += rae_->getThetaDSize();
     new (&grad_Wl) WeightVectorType(ptr, rae_->theta_Wl_size_);
     // grad_Wl.setZero();
     ptr += rae_->theta_Wl_size_;
@@ -81,7 +81,7 @@ void SingleProp::passDataLink(Real* data, int size) {
  ******************************************************************************/
 void SingleProp::forwardPropagate(bool autoencode) {
   for (int i = 0; i < sent_length; ++i) {
-    D[0] += rae_->D.row(instance_->words[i]);
+    D[0] += rae_->de_->getD().row(instance_->words[i]);
   }
 }
 

@@ -1,7 +1,7 @@
 // File: backpropagator.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Mon 21 Oct 2013 08:40:17 PM BST
+// Last Update: Wed 14 May 2014 12:40:46 BST
 
 #include "models/additive/backpropagator.h"
 
@@ -20,7 +20,7 @@ Backpropagator::Backpropagator(RecursiveAutoencoder* rae, const Model &model,
 
     new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
     grad_D.setZero();
-    ptr += rae->theta_D_size_;
+    ptr += rae->getThetaDSize();
     new (&grad_Wl) WeightVectorType(ptr, rae->theta_Wl_size_);
     grad_Wl.setZero();
     ptr += rae->theta_Wl_size_;
@@ -31,7 +31,8 @@ Backpropagator::Backpropagator(RecursiveAutoencoder* rae, const Model &model,
     assert (data + n == ptr);
 
     singleprop->passDataLink(data, n);
-    new (&weights) WeightVectorType(data,n);
+    new (&dict_weights) WeightVectorType(data,rae->getThetaDSize());
+    new (&weights) WeightVectorType(data+rae->getThetaDSize(),rae->getThetaSize());
   }
 
 

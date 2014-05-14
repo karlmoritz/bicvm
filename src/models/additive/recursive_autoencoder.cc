@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Tue 13 May 2014 15:10:45 BST
+// Last Update: Wed 14 May 2014 13:15:56 BST
 
 #include "recursive_autoencoder.h"
 
@@ -56,8 +56,8 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
   new (&Theta_Bl) WeightVectorType(ptr, theta_Bl_size_); ptr += theta_Bl_size_;
   assert (ptr == theta_ + theta_size_);
 
-  //std::random_device rd;
-  //std::mt19937 gen(rd());
+  // std::random_device rd;
+  // std::mt19937 gen(rd());
   std::mt19937 gen(0);
   Real r1 = 6.0 / sqrt( 2 * word_width );
   Real r2 = 1.0 / sqrt( word_width );
@@ -72,7 +72,7 @@ void RecursiveAutoencoder::init(bool init_words, bool create_new_theta) {
   Wl.push_back(WeightMatrixType(ptr, label_width, word_width));
   ptr += label_width*word_width;
   if (init_words) {
-    for (int i = 0; i < theta_Wl_size_; ++i) Theta_Wl(i) = dis1(gen);
+    for (int i = 0; i < theta_Wl_size_; ++i) Theta_Wl(i) = 0.3;//dis1(gen);
   }
 
   // Initialize Label Bias and Weight
@@ -96,7 +96,6 @@ Real RecursiveAutoencoder::getLambdaCost(Bools l, Lambdas lambdas)
 
 void RecursiveAutoencoder::addLambdaGrad(Real* theta_data, Bools l, Lambdas lambdas)
 {
-  theta_data += theta_D_size_;
   if (l.Wl)
   {
     WeightVectorType X = WeightVectorType(theta_data,theta_Wl_size_);
@@ -114,10 +113,9 @@ void RecursiveAutoencoder::addLambdaGrad(Real* theta_data, Bools l, Lambdas lamb
 void RecursiveAutoencoder::setIncrementalCounts(Counts *counts, Real *&vars, int &number)
 {
   vars = theta_;
-  counts->D   = theta_D_size_;
-  counts->Wl  = counts->D + theta_Wl_size_;
+  counts->Wl  = theta_Wl_size_;
   counts->Bl  = counts->Wl  + theta_Bl_size_;
-  number = theta_size_;
+  number = theta_size_ + getThetaDSize();
 }
 
 }  // namespace additive

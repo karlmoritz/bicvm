@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Wed 08 Jan 2014 04:36:56 PM GMT
+// Last Update: Wed 14 May 2014 10:38:01 BST
 
 #include <cmath>
 
@@ -70,7 +70,7 @@ void SingleProp::passDataLink(Real* data, int size) {
     Real *ptr = data;
     new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
     // grad_D.setZero();
-    ptr += rae_->theta_D_size_;
+    ptr += rae_->getThetaDSize();
     new (&grad_Wl) WeightVectorType(ptr, rae_->theta_Wl_size_);
     // grad_Wl.setZero();
     ptr += rae_->theta_Wl_size_;
@@ -85,13 +85,13 @@ void SingleProp::passDataLink(Real* data, int size) {
  ******************************************************************************/
 void SingleProp::forwardPropagate(bool autoencode) {
   if (sent_length == 1) {
-    D[0] = rae_->D.row(instance_->words[0]).unaryExpr(std::ptr_fun(getTanh));
+    D[0] = rae_->de_->getD().row(instance_->words[0]).unaryExpr(std::ptr_fun(getTanh));
     return;
   }
   for (int i = 1; i < sent_length; ++i) {
     D[i] =
-      (rae_->D.row(instance_->words[i-1])
-       + rae_->D.row(instance_->words[i]))
+      (rae_->de_->getD().row(instance_->words[i-1])
+       + rae_->de_->getD().row(instance_->words[i]))
       .unaryExpr(std::ptr_fun(getTanh));
     D[0] += D[i];
   }

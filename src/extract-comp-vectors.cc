@@ -1,7 +1,7 @@
 // File: extract-comp-vectors.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 18:15:38 BST
+// Last Update: Wed 14 May 2014 11:18:05 BST
 
 // STL
 #include <iostream>
@@ -250,7 +250,7 @@ int main(int argc, char **argv)
    ***************************************************************************/
 
 
-  int asize = modelA.rae->getThetaSize();
+  int asize = modelA.rae->getThetaPlusDictSize();
   BackpropagatorBase* backprop = modelA.rae->getBackpropagator(modelA, asize);
 
   fs::path targetFile(vm["output"].as<string>());

@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 18:00:02 BST
+// Last Update: Wed 14 May 2014 12:40:39 BST
 
 // STL
 #include <iostream>

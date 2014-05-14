@@ -1,7 +1,7 @@
 // File: reindex_dict.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 14-02-2013
-// Last Update: Tue 13 May 2014 16:31:43 BST
+// Last Update: Wed 14 May 2014 10:08:07 BST
 
 #include "reindex_dict.h"
 #include "recursive_autoencoder.h"
@@ -12,7 +12,7 @@
  ***************************************************************************/
 DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& de, TrainingCorpus& trainC)
 {
-  DictionaryEmbeddings* new_de = new DictionaryEmbeddings();
+  DictionaryEmbeddings* new_de = new DictionaryEmbeddings(de.getWordWidth());
   std::map<LabelID,LabelID> n2o_map;
 
   // A: Populate new dictionary based on old one
@@ -33,7 +33,7 @@ DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& de, TrainingCorpus& tra
 
 DictionaryEmbeddings* reindex_dict(DictionaryEmbeddings& de, TrainingCorpus& trainC, TrainingCorpus& testC)
 {
-  DictionaryEmbeddings* new_de = new DictionaryEmbeddings();
+  DictionaryEmbeddings* new_de = new DictionaryEmbeddings(de.getWordWidth());
   std::map<LabelID,LabelID> n2o_map;
 
   // A: Populate new dictionary based on old one
