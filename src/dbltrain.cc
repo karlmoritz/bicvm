@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 13:10:08 BST
+// Last Update: Wed 14 May 2014 14:42:59 BST
 
 // STL
 #include <iostream>
@@ -381,21 +381,21 @@ int main(int argc, char **argv)
 
   RecursiveAutoencoderBase& raeA = *raeptrA;
   RecursiveAutoencoderBase& raeB = *raeptrB;
-  DictionaryEmbeddings deA(config.word_representation_size);
-  DictionaryEmbeddings deB(config.word_representation_size);
+  DictionaryEmbeddings* deA = new DictionaryEmbeddings(config.word_representation_size);
+  DictionaryEmbeddings* deB = new DictionaryEmbeddings(config.word_representation_size);
 
   if (vm.count("model1-in"))
   {
     std::ifstream ifs(vm["model1-in"].as<string>());
     boost::archive::text_iarchive ia(ifs);
-    ia >> raeA >> deA;
+    ia >> raeA >> *deA;
     create_new_dict_A = false;
   }
   if (vm.count("model2-in"))
   {
     std::ifstream ifs(vm["model2-in"].as<string>());
     boost::archive::text_iarchive ia(ifs);
-    ia >> raeB >> deB;
+    ia >> raeB >> *deB;
     create_new_dict_B = false;
   }
 
@@ -453,8 +453,8 @@ int main(int argc, char **argv)
   if (embeddings_typeA == 2) embeddings_typeB = 3;
 
   {
-    Senna sennaA(deA,embeddings_typeA);
-    Senna sennaB(deB,embeddings_typeB); //use_embeddings,turian); // no embeddings for the second language
+    Senna sennaA(*deA,embeddings_typeA);
+    Senna sennaB(*deB,embeddings_typeB); //use_embeddings,turian); // no embeddings for the second language
     if (config.tree == TREE_CCG)
     {
       //                   where,       filename,  cv, use_cv, test?, label, add?,       senna?
@@ -492,9 +492,9 @@ int main(int argc, char **argv)
 
     // (Re)create dictionary space and add senna embeddings.
     if (create_new_dict_A) {
-      raeA.createTheta(true); deA.createTheta(true); sennaA.applyEmbeddings(); }
+      raeA.createTheta(true); deA->createTheta(true); sennaA.applyEmbeddings(); }
     if (create_new_dict_B) {
-      raeB.createTheta(true); deB.createTheta(true); sennaB.applyEmbeddings(); }
+      raeB.createTheta(true); deB->createTheta(true); sennaB.applyEmbeddings(); }
   }
 
   /***************************************************************************
@@ -515,10 +515,10 @@ int main(int argc, char **argv)
   modelB.rae->alpha_lbl = lambdas.alpha_lbl;
 
   // Associate dictionaries with RAEs.
-  // modelA.rae->de_ = &newDeA;
-  // modelB.rae->de_ = &newDeB;
-  modelA.rae->de_ = reindex_dict(deA,modelA.corpus);
-  modelB.rae->de_ = reindex_dict(deB,modelB.corpus);
+  modelA.rae->de_ = reindex_dict(*deA,modelA.corpus);
+  modelB.rae->de_ = reindex_dict(*deB,modelB.corpus);
+  delete deA;
+  delete deB;
 
   cout << "Addresses for A: " << &(modelA.rae->de_) << endl;
   cout << "Addresses for B: " << &(modelB.rae->de_) << endl;
