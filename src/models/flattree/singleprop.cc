@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Wed 14 May 2014 13:45:20 BST
+// Last Update: Wed 14 May 2014 14:36:49 BST
 
 #include <cmath>
 
@@ -41,9 +41,6 @@ SingleProp::SingleProp(RecursiveAutoencoderBase* rae,
     }
     Delta_D.push_back(WeightVectorType(ptr, word_width));
     ptr += word_width;
-    // TODO(kmh): Remove deletion from parent class.
-    g_data = nullptr;
-    w_data = nullptr;
     assert(ptr == m_data+m_data_size);
 
     /***************************************************************************

@@ -1,7 +1,7 @@
 // File: singlepropbase.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-10-2013
-// Last Update: Mon 06 Jan 2014 05:47:16 PM GMT
+// Last Update: Wed 14 May 2014 14:36:25 BST
 
 #include "singlepropbase.h"
 
@@ -9,7 +9,7 @@ SinglePropBase::SinglePropBase (Bools updates,
                                 Real beta, bool param_on_tree, bool has_unfolding)
   : updates(updates), beta_(beta), param_on_tree(param_on_tree),
   has_unfolding(has_unfolding), m_data_size(0), w_data_size(0), g_data_size(0) {
-  }
+  m_data = nullptr; w_data = nullptr; g_data = nullptr; }
 
 SinglePropBase::~SinglePropBase() {
   delete [] g_data;
