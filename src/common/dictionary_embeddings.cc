@@ -1,7 +1,7 @@
 // File: dictionary_embeddings.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 12-05-2014
-// Last Update: Wed 14 May 2014 13:15:39 BST
+// Last Update: Wed 14 May 2014 13:39:45 BST
 
 #include <iostream>
 #include <fstream>
@@ -45,15 +45,9 @@ void DictionaryEmbeddings::init(bool init_words, bool create_new_theta) {
  */
 void DictionaryEmbeddings::moveToAddress(Real* new_address)
 {
-  std::cout << "I'm in here" << std::endl;
-  for (int i=0; i<theta_size_; ++i) {
-    new_address[i] = theta_[i];
-    theta_[i] = 0.5;
-  }
+  for (int i=0; i<theta_size_; ++i) { new_address[i] = theta_[i]; }
   delete [] theta_;
-  std::cout << "Made it past" << std::endl;
   theta_ = new_address;
-  std::cout << "Fint " << "theta_ " << theta_ << "   : " << theta_[0] << "  " << &theta_[0] << std::endl;
   init(false,false);
 }
 

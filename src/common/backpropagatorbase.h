@@ -1,7 +1,7 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Wed 14 May 2014 09:41:45 BST
+// Last Update: Wed 14 May 2014 13:37:11 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
@@ -31,7 +31,7 @@ public:
   // Common functionality.
   Real getError();
   void addError(Real i);
-  void reset() { error_ = 0; weights.setZero(); } // subsequently add counts from below, too
+  void reset() { error_ = 0; weights.setZero(); dict_weights.setZero(); } // subsequently add counts from below, too
   WeightVectorType dumpWeights();
   WeightVectorType dumpDict();
   void printInfo();
