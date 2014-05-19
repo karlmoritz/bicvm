@@ -1,7 +1,7 @@
 // File: load_qq.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Wed 14 May 2014 16:01:51 BST
+// Last Update: Mon 19 May 2014 12:22:04 BST
 
 // STL
 #include <iostream>
@@ -31,22 +31,36 @@ void load_qq::load_file(TrainingCorpus& corpusA,
                         Senna& sennaA,
                         Senna& sennaB) {
 
-  string line;
+  std::string line;
   std::ifstream file(file_name);
   while(std::getline(file, line)) {
-    std::stringstream ss(line);
+    // Line separated by three tabs. Sentence 1 TAB Sentence 2 TAB Alignments
+    // We want sentence one and sentence two and discard the alignments.
+    std::stringstream linestream(line);
+    std::string partline;
     std::string  word;
-    vector<string> words, query;
-    while (ss >> word) { // reading in the question
-      if (word == "(lambda") break;
-      words.push_back(word);
+    vector<string> wordsA, wordsB;
+
+    // First sentence
+    {
+      std::getline(linestream, partline, '\t');
+      std::stringstream ss(partline);
+      while (ss >> word) { // reading in the first sentence
+        wordsA.push_back(word);
+      }
     }
-    while (ss >> word) { // reading in the question
-      query.push_back(word);
+    // Second sentence
+    {
+      std::getline(linestream, partline, '\t');
+      std::stringstream ss(partline);
+      while (ss >> word) { // reading in the second sentence
+        wordsB.push_back(word);
+      }
     }
-    if (int(words.size()) > 0) {
-      corpusA.push_back(createSentence(sennaA, words, create_dict_A));
-      corpusB.push_back(createSentence(sennaB, query, create_dict_B));
+
+    if (int(wordsA.size()) > 0) {
+      corpusA.push_back(createSentence(sennaA, wordsA, create_dict_A));
+      corpusB.push_back(createSentence(sennaB, wordsB, create_dict_B));
     }
   }
 }
