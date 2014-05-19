@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 14 May 2014 12:11:41 BST
+// Last Update: Mon 19 May 2014 14:19:45 BST
 
 #ifndef COMMON_RECURSIVE_AUTOENCODER_H
 #define COMMON_RECURSIVE_AUTOENCODER_H
@@ -74,8 +74,8 @@ class RecursiveAutoencoderBase {
   friend class Trainer;
   friend class OpenQATrainer;
   friend class GeneralTrainer;
-  /* void setVarsAndNumber(Real *&vars, int &number_vars, Model &model); */
   friend int main(int argc, char **argv);
+  friend void dumpModel(Model& model, int k);
 
   friend RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae,
                                                 TrainingCorpus& trainC,

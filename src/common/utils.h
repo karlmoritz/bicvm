@@ -1,24 +1,15 @@
 // File: utils.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Fri 11 Oct 2013 03:53:15 PM BST
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Mon 19 May 2014 14:19:27 BST
+
+#ifndef COMMON_UTILS_H
+#define COMMON_UTILS_H
 
 #include <algorithm>
 #include <functional>
 #include <cctype>
 #include <locale>
-
-#ifndef UTILS_H_ODQEYJVF
-#define UTILS_H_ODQEYJVF
-
 
 #include "shared_defs.h"
 #include "models.h"
@@ -44,5 +35,4 @@ static inline std::string &trim(std::string &s) {
         return ltrim(rtrim(s));
 }
 
-
-#endif /* end of include guard: UTILS_H_ODQEYJVF */
+#endif  // COMMON_UTILS_H
