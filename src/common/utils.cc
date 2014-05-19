@@ -1,7 +1,7 @@
 // File: utils.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Thu 02 Jan 2014 05:05:33 PM GMT
+// Last Update: Mon 19 May 2014 14:15:34 BST
 
 #include "utils.h"
 
@@ -29,7 +29,7 @@ void dumpModel(Model& model, int k)
   fname << model.rae->config.model_out << "_i" << k;
   std::ofstream ofs(fname.str());
   boost::archive::text_oarchive oa(ofs);
-  oa << *(model.rae);
+  oa << *(model.rae) << *(model.rae->de_);
   }
 
   if (model.b != nullptr)
@@ -39,7 +39,7 @@ void dumpModel(Model& model, int k)
     fname << model.b->rae->config.model_out << "_i" << k;
     std::ofstream ofs(fname.str());
     boost::archive::text_oarchive oa(ofs);
-    oa << *(model.b->rae);
+    oa << *(model.b->rae) << *(model.b->rae->de_);
   }
 }
 
