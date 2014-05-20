@@ -1,7 +1,7 @@
 // File: load_qq.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Wed 14 May 2014 16:02:06 BST
+// Last Update: Tue 20 May 2014 18:56:15 BST
 
 #ifndef COMMON_LOAD_QQ_H
 #define COMMON_LOAD_QQ_H

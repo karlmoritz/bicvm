@@ -1,7 +1,7 @@
 // File: load_qq.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Mon 19 May 2014 12:22:04 BST
+// Last Update: Tue 20 May 2014 19:02:24 BST
 
 // STL
 #include <iostream>
@@ -32,13 +32,13 @@ void load_qq::load_file(TrainingCorpus& corpusA,
                         Senna& sennaB) {
 
   std::string line;
+  std::string partline;
+  std::string word;
   std::ifstream file(file_name);
   while(std::getline(file, line)) {
     // Line separated by three tabs. Sentence 1 TAB Sentence 2 TAB Alignments
     // We want sentence one and sentence two and discard the alignments.
     std::stringstream linestream(line);
-    std::string partline;
-    std::string  word;
     vector<string> wordsA, wordsB;
 
     // First sentence
