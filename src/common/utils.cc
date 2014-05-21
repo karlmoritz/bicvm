@@ -1,7 +1,7 @@
 // File: utils.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Mon 19 May 2014 14:15:34 BST
+// Last Update: Wed 21 May 2014 19:46:48 BST
 
 #include "utils.h"
 
@@ -20,6 +20,7 @@
 #include "singlepropbase.h"
 #include "backpropagatorbase.h"
 #include "recursive_autoencoder.h"
+
 
 void dumpModel(Model& model, int k)
 {
@@ -139,4 +140,30 @@ void paraphraseTest(Model& modelA, int k)
   cout << "Iteration " << k << endl;
   cout << "Correct: " << correct_count << "/" << length << ": " << (100.0 * correct_count)/length << "%" << endl;
   delete [] data;
+}
+
+void printConfig(const bpo::variables_map& vm) {
+  /***************************************************************************
+   *                   Print brief summary of model setup                    *
+   ***************************************************************************/
+
+  cerr << "################################" << endl;
+  cerr << "# Config Summary" << endl;
+  for (bpo::variables_map::const_iterator iter = vm.begin(); iter != vm.end(); ++iter)
+  {
+    cerr << "# " << iter->first << " = ";
+    const ::std::type_info& type = iter->second.value().type() ;
+    if ( type == typeid( ::std::string ) )
+      cerr << iter->second.as<string>() << endl;
+    if ( type == typeid( int ) )
+      cerr << iter->second.as<int>() << endl;
+    if ( type == typeid( float ) )
+      cerr << iter->second.as<float>() << endl;
+    if ( type == typeid( double ) )
+      cerr << iter->second.as<double>() << endl;
+    if ( type == typeid( bool ) )
+      cerr << iter->second.as<bool>() << endl;
+  }
+  cerr << "################################" << endl;
+
 }

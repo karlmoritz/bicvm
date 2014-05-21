@@ -1,14 +1,13 @@
 // File: qq-extract-relent.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 20 May 2014 19:25:41 BST
+// Last Update: Wed 21 May 2014 19:47:30 BST
 
 // STL
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <queue>
 #include <vector>
 
 // Boost
@@ -20,7 +19,6 @@
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/regex.hpp>
@@ -31,28 +29,13 @@
 // Local
 #include "common/shared_defs.h"
 #include "common/dictionary.h"
-
 #include "common/config.h"
-
 #include "common/models.h"
-
 #include "common/load_relent.h"
 
 #include "common/senna.h"
 #include "common/reindex_dict.h"
 #include "common/utils.h"
-
-#include "common/finetune_classifier.h"
-
-// Training Regimes
-#include "common/train_lbfgs.h"
-#include "common/train_sgd.h"
-#include "common/train_adagrad.h"
-#include "common/finite_grad_check.h"
-
-#include "common/trainer.h"
-#include "common/openqa_trainer.h"
-#include "common/general_trainer.h"
 
 #define EIGEN_DONT_PARALLELIZE
 
@@ -102,33 +85,13 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  /***************************************************************************
-   *                   Print brief summary of model setup                    *
-   ***************************************************************************/
-
-  cerr << "################################" << endl;
-  cerr << "# Config Summary" << endl;
-  for (bpo::variables_map::iterator iter = vm.begin(); iter != vm.end(); ++iter)
-  {
-    cerr << "# " << iter->first << " = ";
-    const ::std::type_info& type = iter->second.value().type() ;
-    if ( type == typeid( ::std::string ) )
-      cerr << iter->second.as<string>() << endl;
-    if ( type == typeid( int ) )
-      cerr << iter->second.as<int>() << endl;
-    if ( type == typeid( float ) )
-      cerr << iter->second.as<float>() << endl;
-    if ( type == typeid( double ) )
-      cerr << iter->second.as<double>() << endl;
-    if ( type == typeid( bool ) )
-      cerr << iter->second.as<bool>() << endl;
-  }
-  cerr << "################################" << endl;
-
+  // Print model config options.
+  printConfig(vm);
   ModelData config;
 
   RecursiveAutoencoderBase* raeptrA = nullptr;
 
+  // Factor out at some stage!
   string type = vm["type"].as<string>();
   if (type == "additive") {
     raeptrA = new additive::RecursiveAutoencoder(config);
@@ -179,9 +142,7 @@ int main(int argc, char **argv)
     line = line.substr(line.find(" ")+1);
     sentence_strings.push_back(line);
     types.push_back(type);
-    // std::cout << line << std::endl;
   }
-
 
   /***************************************************************************
    *    Propagate inputs and store in appropriate output files               *
