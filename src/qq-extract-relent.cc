@@ -1,7 +1,7 @@
 // File: qq-extract-relent.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 21 May 2014 19:47:30 BST
+// Last Update: Thu 22 May 2014 12:08:19 BST
 
 // STL
 #include <iostream>
@@ -97,6 +97,8 @@ int main(int argc, char **argv)
     raeptrA = new additive::RecursiveAutoencoder(config);
   } else if (type == "flattree") {
     raeptrA = new flattree::RecursiveAutoencoder(config);
+  } else if (type == "additive_avg") {
+    raeptrA = new additive_avg::RecursiveAutoencoder(config);
   } else {
     cout << "Model (" << type << ") does not exist" << endl; return -1;
   }
