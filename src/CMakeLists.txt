@@ -68,6 +68,7 @@ set(LBFGS_FLOAT "32")
 add_subdirectory(common)
 add_subdirectory(models/additive)
 add_subdirectory(models/flattree)
+add_subdirectory(models/additive_avg)
 
 add_library(pugi SHARED pugi/pugixml.cpp)
 
@@ -79,5 +80,6 @@ set(EXECUTABLES dbltrain doctrain extract-vectors extract-comp-vectors
   ted-to-libsvm qqtrain qq-extract-relent qq-extract-text)
 foreach(f ${EXECUTABLES})
   add_executable(${f} ${f}.cc)
-  target_link_libraries(${f} basics loaders trainers basemod dualtrain modadditive modflattree pugi)
+  target_link_libraries(${f} basics loaders trainers basemod dualtrain pugi)
+  target_link_libraries(${f} modadditive modflattree modadditive_avg)
 endforeach(f)

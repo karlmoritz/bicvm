@@ -1,7 +1,7 @@
 // File: singleprop.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 03-01-2013
-// Last Update: Mon 28 Oct 2013 11:54:32 AM GMT
+// Last Update: Thu 22 May 2014 11:51:22 BST
 // Simple flattree model: Sum all vectors together and that's it.
 
 #ifndef MODELS_FLATTREE_SINGLEPROP_H
@@ -12,16 +12,8 @@
 #include "recursive_autoencoder.h"
 
 namespace flattree {
-/*
- * inline Real slowSigmoid(Real val)
- * {
- *   return 1/(1+exp(-val));
- * }
- * inline Real slowTanh(Real val)
- * {
- *   return tanh(val);
- * }
- */
+
+class RecursiveAutoencoder;
 
 class SingleProp : public SinglePropBase {
  public:

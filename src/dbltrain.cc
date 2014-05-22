@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 14:42:59 BST
+// Last Update: Thu 22 May 2014 11:59:56 BST
 
 // STL
 #include <iostream>
@@ -375,6 +375,9 @@ int main(int argc, char **argv)
   } else if (type == "flattree") {
     raeptrA = new flattree::RecursiveAutoencoder(configA);
     raeptrB = new flattree::RecursiveAutoencoder(configB);
+  } else if (type == "additive_avg") {
+    raeptrA = new additive_avg::RecursiveAutoencoder(configA);
+    raeptrB = new additive_avg::RecursiveAutoencoder(configB);
   } else {
     cout << "Model (" << type << ") does not exist" << endl; return -1;
   }

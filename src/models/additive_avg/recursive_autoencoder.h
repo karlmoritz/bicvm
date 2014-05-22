@@ -1,17 +1,17 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Thu 22 May 2014 11:51:26 BST
+// Last Update: Thu 22 May 2014 11:51:44 BST
 
-#ifndef MODELS_FLATTREE_RECURSIVE_AUTOENCODER_H
-#define MODELS_FLATTREE_RECURSIVE_AUTOENCODER_H
+#ifndef MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H
+#define MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H
 
 #include "../../common/recursive_autoencoder.h"
 
 #include "singleprop.h"
 #include "backpropagator.h"
 
-namespace flattree {
+namespace additive_avg {
 
 class RecursiveAutoencoder : public RecursiveAutoencoderBase {
  public:
@@ -46,6 +46,6 @@ class RecursiveAutoencoder : public RecursiveAutoencoderBase {
   WeightVectorType      Theta_Bl;
 };
 
-}  // namespace flattree
+}  // namespace additive_avg
 
-#endif  // MODELS_FLATTREE_RECURSIVE_AUTOENCODER_H
+#endif  // MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H

@@ -1,17 +1,17 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 14 May 2014 10:33:02 BST
+// Last Update: Thu 22 May 2014 11:50:56 BST
 
 #ifndef MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
 #define MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
 
 #include "../../common/recursive_autoencoder.h"
 
-namespace additive {
+#include "singleprop.h"
+#include "backpropagator.h"
 
-class Backpropagator;
-class SingleProp;
+namespace additive {
 
 class RecursiveAutoencoder : public RecursiveAutoencoderBase {
  public:

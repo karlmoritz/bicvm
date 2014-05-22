@@ -1,17 +1,17 @@
 // File: singleprop.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 03-01-2013
-// Last Update: Thu 22 May 2014 11:50:28 BST
-// Simple additive model: Sum all vectors together and that's it.
+// Last Update: Thu 22 May 2014 11:51:41 BST
+// Simple additive_avg model: Sum all vectors together and that's it.
 
-#ifndef MODELS_ADDITIVE_SINGLEPROP_H
-#define MODELS_ADDITIVE_SINGLEPROP_H
+#ifndef MODELS_ADDITIVE_AVG_SINGLEPROP_H
+#define MODELS_ADDITIVE_AVG_SINGLEPROP_H
 
 #include "../../common/shared_defs.h"
 #include "../../common/singlepropbase.h"
 #include "recursive_autoencoder.h"
 
-namespace additive {
+namespace additive_avg {
 
 class RecursiveAutoencoder;
 
@@ -49,5 +49,5 @@ class SingleProp : public SinglePropBase {
   WeightVectorType grad_Bl;
 };
 
-}  // namespace additive
-#endif  // MODELS_ADDITIVE_SINGLEPROP_H
+}  // namespace additive_avg
+#endif  // MODELS_ADDITIVE_AVG_SINGLEPROP_H
