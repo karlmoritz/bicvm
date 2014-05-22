@@ -8,7 +8,7 @@ add_library(basemod SHARED recursive_autoencoder.cc singlepropbase.cc
 add_library(basics SHARED fast_math.cc finetune_classifier.cc reindex_dict.cc
   senna.cc shared_defs.cc utils.cc)
 add_library(loaders SHARED load_alpino.cc load_ccg.cc load_doc.cc load_plain.cc
-  load_stanford.cc load_qq.cc load_relent.cc)
+  load_stanford.cc load_qq.cc load_relent.cc load_qqpair.cc)
 target_link_libraries(loaders ${Boost_FILESYSTEM_LIBRARIES}
   ${Boost_SYSTEM_LIBRARIES})
 

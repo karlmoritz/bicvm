@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Thu 22 May 2014 12:05:41 BST
+// Last Update: Thu 22 May 2014 16:42:15 BST
 
 #include <cmath>
 
