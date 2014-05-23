@@ -1,18 +1,10 @@
 // File: dictionary.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 31-12-2012
-// Last Update: Fri 03 Jan 2014 05:01:11 PM GMT
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Fri 23 May 2014 09:17:15 BST
 
-#ifndef __DICTIONARY_H__
-#     define __DICTIONARY_H__
+#ifndef COMMON_DICTIONARY_H
+#define COMMON_DICTIONARY_H
 
 #include <boost/bimap.hpp>
 #include <boost/serialization/map.hpp>
@@ -93,4 +85,4 @@ protected:
   LabelBimap      m_bimap;
 };
 
-#endif /* __DICTIONARY_H__ */
+#endif  // COMMON_DICTIONARY_H
