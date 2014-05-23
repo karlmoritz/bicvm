@@ -1,7 +1,7 @@
 // File: extract-vectors.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Fri 23 May 2014 09:50:52 BST
+// Last Update: Fri 23 May 2014 09:53:54 BST
 
 // STL
 #include <iostream>
@@ -131,7 +131,6 @@ int main(int argc, char **argv)
   } else {
     // Iterate over the dictionary.
     Dictionary dictA = deA->getDictionary();
-    cout << "MIN/MAX" << dictA.min_label() << " " << dictA.max_label() << endl;
     for(LabelID id = dictA.min_label(); id < dictA.max_label(); ++id) {
       cout << dictA.label(id);
       for (int i = 0; i < word_width; ++i) {
