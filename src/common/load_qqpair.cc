@@ -1,7 +1,7 @@
 // File: load_qqpair.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Thu 22 May 2014 16:12:31 BST
+// Last Update: Mon 26 May 2014 14:46:15 BST
 
 // STL
 #include <iostream>
@@ -18,6 +18,7 @@ void load_qqpair::load_file(TrainingCorpus& corpus_string,
                             TrainingCorpus& corpus_query2,
                             string file_name,
                             bool create_dict,
+                            bool remove_type_ending,
                             Senna& senna) {
 
   std::string line, partline, compound, word;
@@ -61,21 +62,29 @@ void load_qqpair::load_file(TrainingCorpus& corpus_string,
       }
 
       {
-      ss >> compound; // entity 1
-      compound = compound.substr(0,compound.length()-2); // remove type ending
-      std::stringstream compoundstream(compound);
-      while(std::getline(compoundstream, word, '-')) {
-        wordsB.push_back(word);
-      }
+        ss >> compound; // entity 1
+        if ( remove_type_ending ) {
+          compound = compound.substr(0,compound.length()-2); // remove type ending
+          std::stringstream compoundstream(compound);
+          while(std::getline(compoundstream, word, '-')) {
+            wordsB.push_back(word);
+          }
+        } else {
+          wordsB.push_back(compound + ".1");
+        }
       }
 
       {
-      ss >> compound; // entity 2
-      compound = compound.substr(0,compound.length()-2); // remove type ending
-      std::stringstream compoundstream(compound);
-      while(std::getline(compoundstream, word, '-')) {
-        wordsC.push_back(word);
-      }
+        ss >> compound; // entity 2
+        if ( remove_type_ending ) {
+          compound = compound.substr(0,compound.length()-2); // remove type ending
+          std::stringstream compoundstream(compound);
+          while(std::getline(compoundstream, word, '-')) {
+            wordsC.push_back(word);
+          }
+        } else {
+          wordsC.push_back(compound + ".2");
+        }
       }
     }
 

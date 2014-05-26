@@ -1,7 +1,7 @@
 // File: qq-rerank-eval.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 22 May 2014 16:02:54 BST
+// Last Update: Mon 26 May 2014 14:47:48 BST
 
 // STL
 #include <iostream>
@@ -74,6 +74,8 @@ int main(int argc, char **argv)
      "prefix for output files <pre>.results and <pre>.rawdump")
     ("embeddings", bpo::value<int>()->default_value(-1),
      "use embeddings for baseline dictionary (0=senna,1=turian,2=cldc-en,3=cldc-de)")
+    ("eas", bpo::value<bool>()->default_value(true),
+     "treat entities as string concatenations (true) or as unigram (false)?")
     ;
   bpo::options_description all_options;
   all_options.add(generic).add(cmdline_specific);
@@ -121,11 +123,13 @@ int main(int argc, char **argv)
   int embeddings = vm["embeddings"].as<int>();
   string inputA = vm["input"].as<string>();
   bool create_new_dict = false;
+  bool remove_type_ending = vm["eas"].as<bool>();
 
   Senna sennaA(*deA,embeddings);
 
   assert(!inputA.empty());
-  load_qqpair::load_file(modelA.corpus, modelB.corpus, modelC.corpus, inputA, create_new_dict, sennaA);
+  load_qqpair::load_file(modelA.corpus, modelB.corpus, modelC.corpus, inputA,
+                         create_new_dict, remove_type_ending, sennaA);
 
   modelA.rae = &raeA;
   modelA.rae->de_ = deA;

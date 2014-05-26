@@ -1,7 +1,7 @@
 // File: load_qqpair.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Thu 22 May 2014 15:41:42 BST
+// Last Update: Mon 26 May 2014 14:40:33 BST
 
 #ifndef COMMON_LOAD_QQPAIR_H
 #define COMMON_LOAD_QQPAIR_H
@@ -17,6 +17,7 @@ void load_file(TrainingCorpus& corpusA,
                TrainingCorpus& corpusC,
                string file_name,
                bool create_dict,
+               bool remove_type_ending,
                Senna& senna);
 
 Sentence createSentence(Senna& senna, vector<string>& words, int truth_label=0);
