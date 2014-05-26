@@ -1,7 +1,7 @@
 // File: qq-extract-text.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 22 May 2014 12:08:14 BST
+// Last Update: Mon 26 May 2014 16:59:24 BST
 
 // STL
 #include <iostream>
@@ -74,6 +74,8 @@ int main(int argc, char **argv)
      "prefix for output files <pre>.ent and <pre>.rel")
     ("embeddings", bpo::value<int>()->default_value(-1),
      "use embeddings for baseline dictionary (0=senna,1=turian,2=cldc-en,3=cldc-de)")
+    ("tab", bpo::value<bool>()->default_value(false),
+     "tab-separate output and add header row")
     ;
   bpo::options_description all_options;
   all_options.add(generic).add(cmdline_specific);
@@ -143,11 +145,18 @@ int main(int argc, char **argv)
   {
     // Forward propagate all sentences and store their resulting vector in
     // the document model dictionary.
+    string separator = " ";
+    if (vm["tab"].as<bool>()) {
+      separator = "\t";
+      output_file << "Name";
+      for (int j = 0; j < word_width; ++j) output_file << "\t" << j;
+      output_file << endl;
+    }
     VectorReal x(word_width);
     for (int j = 0; j < modelA.corpus.size(); ++j) {
       backprop->forwardPropagate(j,&x);
       output_file << x[0];
-      for (int i = 1; i < word_width; ++i) { output_file << " " << x[i]; }
+      for (int i = 1; i < word_width; ++i) { output_file << separator << x[i]; }
       output_file << endl;
     }
   }

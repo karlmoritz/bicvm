@@ -1,7 +1,7 @@
 // File: qq-extract-relent.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 22 May 2014 12:08:19 BST
+// Last Update: Mon 26 May 2014 16:59:06 BST
 
 // STL
 #include <iostream>
@@ -74,6 +74,8 @@ int main(int argc, char **argv)
      "prefix for output files <pre>.ent and <pre>.rel")
     ("embeddings", bpo::value<int>()->default_value(-1),
      "use embeddings for baseline dictionary (0=senna,1=turian,2=cldc-en,3=cldc-de)")
+    ("tab", bpo::value<bool>()->default_value(false),
+     "tab-separate output and add header row")
     ;
   bpo::options_description all_options;
   all_options.add(generic).add(cmdline_specific);
@@ -161,17 +163,27 @@ int main(int argc, char **argv)
   {
     // Forward propagate all sentences and store their resulting vector in
     // the document model dictionary.
+    string separator = " ";
+    if (vm["tab"].as<bool>()) {
+      separator = "\t";
+      rel_file << "Name";
+      for (int j = 0; j < word_width; ++j) rel_file << "\t" << j;
+      rel_file << endl;
+      ent_file << "Name";
+      for (int j = 0; j < word_width; ++j) ent_file << "\t" << j;
+      ent_file << endl;
+    }
     VectorReal x(word_width);
     for (int j = 0; j < modelA.corpus.size(); ++j) {
       backprop->forwardPropagate(j,&x);
       if (types[j] == "e") {
         ent_file << sentence_strings[j];
-        for (int i = 0; i < word_width; ++i) { ent_file << " " << x[i]; }
+        for (int i = 0; i < word_width; ++i) { ent_file << separator << x[i]; }
         ent_file << endl;
       }
       if (types[j] == "r") {
         rel_file << sentence_strings[j];
-        for (int i = 0; i < word_width; ++i) { rel_file << " " << x[i]; }
+        for (int i = 0; i < word_width; ++i) { rel_file << separator << x[i]; }
         rel_file << endl;
       }
     }
