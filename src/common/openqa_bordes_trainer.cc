@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 28 May 2014 19:32:52 BST
+// Last Update: Wed 28 May 2014 19:57:43 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -57,22 +57,6 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
     dweightsA.setZero();
   }
 
-  WeightMatrixType docgrad_AD(0,0,0);
-  WeightMatrixType docgrad_BD(0,0,0);
-  if (modelA.docmod != nullptr) {
-    int modsize_C = modelA.docmod->rae->getThetaSize();
-    int modsize_D = modelB.docmod->rae->getThetaSize();
-    int dictsize_C = modelA.docmod->rae->de_->getThetaSize();
-
-    int word_width = modelA.rae->config.word_representation_size;
-    int docAdict_size = modelA.docmod->rae->getDictSize();
-    int docBdict_size = modelB.docmod->rae->getDictSize();
-    // Bonus weights even further back. Use these for pulling docmodgrads.
-    // [modA,modB,dicA,dicB,modC,modD,dicC,dicB]
-    ptr += modsize_C + modsize_D;
-    new (&docgrad_AD) WeightMatrixType(ptr, docAdict_size, word_width);
-    ptr += dictsize_C;
-  }
   assert (gradient_location + n == ptr);
 
   Real gamma = modelA.gamma;
@@ -86,26 +70,13 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
     VectorReal rootA(modelA.rae->config.word_representation_size);
     VectorReal rootB(modelA.rae->config.word_representation_size);
 
-    if (modelA.rae->config.calc_lbl) prop.propA->backPropagateLbl(j,&rootA);
-    if (modelA.rae->config.calc_rae) prop.propA->backPropagateRae(j,&rootA);
-    if (modelB.rae->config.calc_rae) prop.propB->backPropagateRae(j,&rootB);
-    if (modelA.rae->config.calc_uae) prop.propA->backPropagateUnf(j,&rootA);
-    if (modelB.rae->config.calc_uae) prop.propB->backPropagateUnf(j,&rootB);
-
     if (modelA.rae->config.calc_bi) {
       // Forward propagate parallel and noise version (B)
       SinglePropBase* other = prop.propB->forwardPropagate(j,&rootB);
 
-      if (modelB.docmod != nullptr) {
-        // If docmod, pass the sentence vector into the docmod model now.
-        // sent_id is unique, so parallel access should not be an issue.
-        int sent_id = modelB.corpus[j].id;
-        modelB.docmod->rae->de_->D.row(sent_id) = rootB;
-      }
-
       // The "normal" biprop: backprop self given the other root and vice versa
-      prop.propA->backPropagateBi(j,&rootA,rootB); // inefficient (repeats fprop)
-      prop.propB->backPropagateBi(j,&rootB,rootA);
+      // prop.propA->backPropagateBi(j,&rootA,rootB); // inefficient (repeats fprop)
+      // prop.propB->backPropagateBi(j,&rootB,rootA);
 
       VectorReal combined_noise_root(modelA.rae->config.word_representation_size);
       combined_noise_root.setZero();
@@ -138,15 +109,8 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
         prop.propB->addError(0.5*gamma*noise_error);
         SinglePropBase* selff = prop.propA->forwardPropagate(j,&rootA);
         // dH/dA = N - B
-        if (modelA.docmod != nullptr && iteration > 0) {
-          // Add docmod gradient and error!
-          prop.propA->backPropagateGiven(j, selff,
-                                         docgrad_AD.row(modelA.corpus[j].id).transpose() +
-                                         gamma*(combined_noise_root - noise_count*rootB));
-        } else {
           prop.propA->backPropagateGiven(j, selff,
                                          gamma*(combined_noise_root - noise_count*rootB));
-        }
         prop.propA->addCountsAndGradsForGiven(j, selff);
         // dH/dB = B - A
         other = prop.propB->forwardPropagate(j,&rootB);
@@ -158,15 +122,10 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
     if (modelB.rae->config.calc_bi) {
       // Forward propagate parallel and noise version (B)
       SinglePropBase* other = prop.propA->forwardPropagate(j,&rootA);
-      if (modelA.docmod != nullptr) {
-        // If docmod, pass the sentence vector into the docmod model now.
-        int sent_id = modelA.corpus[j].id;
-        modelA.docmod->rae->de_->D.row(sent_id) = rootA; // using sent_id directly to store correct row.
-      }
 
       // Do the "normal" biprop: backprop self given the other root and vice
-      prop.propB->backPropagateBi(j,&rootB,rootA); // inefficient (repeats fprop)
-      prop.propA->backPropagateBi(j,&rootA,rootB);
+      // prop.propB->backPropagateBi(j,&rootB,rootA); // inefficient (repeats fprop)
+      // prop.propA->backPropagateBi(j,&rootA,rootB);
 
       VectorReal combined_noise_root(modelA.rae->config.word_representation_size);
       combined_noise_root.setZero();
@@ -197,51 +156,15 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
         prop.propA->addError(0.5*gamma*noise_error);
         // Add docmod gradient and error!
         SinglePropBase* selff = prop.propB->forwardPropagate(j,&rootB);
-        if (modelB.docmod != nullptr && iteration > 0) {
-          // Add docmod gradient and error!
-          prop.propB->backPropagateGiven(j, selff,
-                                         docgrad_BD.row(modelB.corpus[j].id).transpose() +
-                                         gamma*(combined_noise_root - noise_count*rootA));
-        } else {
           prop.propB->backPropagateGiven(j,selff,
                                          gamma*(combined_noise_root - noise_count*rootA));
-        }
         prop.propB->addCountsAndGradsForGiven(j, selff);
         other = prop.propA->forwardPropagate(j,&rootA);
         prop.propA->backPropagateGiven(j,other,gamma*noise_count*(rootA - rootB));
         prop.propA->addCountsAndGradsForGiven(j, other);
       }
     }
-
-    if (modelA.rae->config.calc_through) {
-      // TODO(kmh): This is almost certainly buggy!
-      SinglePropBase* other = prop.propA->forwardPropagate(j, &rootB); // forward propagates (sets &rootB to root)
-      prop.propB->unfoldPropagateGiven(j, other, &rootA); // unfold using other->root as root, sets rootA to delta_D[0]
-      prop.propA->backPropagateGiven(j, other, rootA); // backprops given model (other) with gradient (rootA)
-      prop.propA->addCountsAndGradsForGiven(j, other);
-    }
-    if (modelB.rae->config.calc_through) {
-      SinglePropBase* other = prop.propB->forwardPropagate(j, &rootB); // forward propagates (on B)
-      prop.propA->unfoldPropagateGiven(j, other, &rootA); // unfold given a root node, calculates sets gradient (A given B)
-      prop.propB->backPropagateGiven(j, other, rootA); // backprop given a gradient on the root node (B given grad(A) )
-      prop.propB->addCountsAndGradsForGiven(j, other);
-    }
   }  // end of for loop over sentences.
-
-#pragma omp master
-  {
-    // if (modelA.rae->config.calc_lbl) prop.propA->printInfo();
-    int outwidth = 16;
-    // cout << setw(outwidth) << "ERRORS";
-    // cout << setw(outwidth) << "A";
-    // cout << setw(outwidth) << "B";
-    // cout << endl;
-
-    // cout << setw(outwidth) << " ";
-    // cout << setw(outwidth) << prop.propA->getError();
-    // cout << setw(outwidth) << prop.propB->getError();
-    // cout << endl;
-  }
 
 #pragma omp critical
   {
@@ -270,20 +193,13 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
     ptr += modsize_A;
     if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
     ptr += modsize_B;
+    if (modelA.docmod) { // If we have docmods, we need to skip over those.
+     ptr += modelA.docmod->rae->getThetaSize();
+     ptr += modelB.docmod->rae->getThetaSize();
+    }
     if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
     ptr += dictsize_A;
     }
-  }
-
-  // If we're at the final loop (in case of minibatch updates) we now calculate
-  // the gradients for the document level model.
-  if (modelA.to == modelA.corpus.size() && modelA.docmod != nullptr) {
-    int docmodsize = modelA.docmod->rae->getThetaSize()
-      + modelB.docmod->rae->getThetaSize()
-      + modelA.docmod->rae->de_->getThetaSize()
-      + modelB.docmod->rae->de_->getThetaSize();
-    // computeBiCostAndGrad(*modelA.docmod, *modelB.docmod, x, ptr, docmodsize, 1,
-                         // *prop.docprop, error);
   }
 }
 
@@ -320,6 +236,8 @@ void OpenQABordesTrainer::testModel(Model &model) {
 void OpenQABordesTrainer::setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
   number_vars += model.rae->getThetaSize();
   number_vars += model.b->rae->getThetaSize();
+  number_vars += model.docmod->rae->getThetaSize();
+  number_vars += model.b->docmod->rae->getThetaSize();
   number_vars += model.rae->de_->getThetaSize();
   vars = model.rae->theta_;
 }
