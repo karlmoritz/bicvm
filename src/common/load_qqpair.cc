@@ -1,7 +1,7 @@
 // File: load_qqpair.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-01-2013
-// Last Update: Mon 26 May 2014 14:46:15 BST
+// Last Update: Wed 28 May 2014 18:15:22 BST
 
 // STL
 #include <iostream>
@@ -53,11 +53,16 @@ void load_qqpair::load_file(TrainingCorpus& corpus_string,
 
       {
       ss >> compound; // relation
-      compound = compound.substr(0,compound.length()-2); // remove type ending
-      std::stringstream compoundstream(compound);
-      while(std::getline(compoundstream, word, '-')) {
-        wordsB.push_back(word);
-        wordsC.push_back(word);
+      if ( remove_type_ending ) {
+        compound = compound.substr(0,compound.length()-2); // remove type ending
+        std::stringstream compoundstream(compound);
+        while(std::getline(compoundstream, word, '-')) {
+          wordsB.push_back(word);
+          wordsC.push_back(word);
+        }
+      } else {
+        wordsB.push_back(compound);
+        wordsC.push_back(compound);
       }
       }
 

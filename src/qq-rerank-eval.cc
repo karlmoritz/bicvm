@@ -1,7 +1,7 @@
 // File: qq-rerank-eval.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 26 May 2014 14:47:48 BST
+// Last Update: Wed 28 May 2014 18:33:14 BST
 
 // STL
 #include <iostream>
@@ -166,10 +166,11 @@ int main(int argc, char **argv)
   BackpropagatorBase* backpropQ2 = modelC.rae->getBackpropagator(modelC, csize);
 
   Real cosineA,cosineB,euclideanA,euclideanB;
+  Real cosine,euclidean;
 
   int word_width = modelA.rae->config.word_representation_size;
-  fs::path res_file_path(vm["prefix"].as<string>() + ".results");
-  fs::path raw_file_path(vm["prefix"].as<string>() + ".rawdump");
+  fs::path res_file_path(vm["prefix"].as<string>() + ".cosine");
+  fs::path raw_file_path(vm["prefix"].as<string>() + ".euclid");
   fs::ofstream res_file(res_file_path);
   fs::ofstream raw_file(raw_file_path);
   {
@@ -180,12 +181,19 @@ int main(int argc, char **argv)
       backpropS->forwardPropagate(j,&x);
       backpropQ1->forwardPropagate(j,&queryA);
       backpropQ2->forwardPropagate(j,&queryB);
-      cosineA = ((x.transpose() * queryA).sum() / (x.norm() * queryA.norm()));
-      euclideanA = (x - queryA).squaredNorm();
-      cosineB = ((x.transpose() * queryB).sum() / (x.norm() * queryB.norm()));
-      euclideanB = (x - queryB).squaredNorm();
-      res_file << max(cosineA,cosineB) << endl;
-      raw_file << min(euclideanA,euclideanB) << endl;
+      // Ensure we only consider queries for which we have both embeddings.
+      if (modelB.corpus[j].words[1] != 0) {
+        cosineA = ((x.transpose() * queryA).sum() / (x.norm() * queryA.norm()));
+        euclideanA = (x - queryA).squaredNorm();
+      }
+      if (modelC.corpus[j].words[1] != 0) {
+        cosineB = ((x.transpose() * queryB).sum() / (x.norm() * queryB.norm()));
+        euclideanB = (x - queryB).squaredNorm();
+      }
+      cosine = (modelB.corpus[j].words[1] != 0) ? max(cosineA,cosineB) : cosineB;
+      euclidean = (modelB.corpus[j].words[1] != 0) ? min(euclideanA,euclideanB) : euclideanB;
+      res_file << cosineA << endl;
+      raw_file << euclidean << endl;
     }
   }
   delete backpropS, backpropQ1, backpropQ2;

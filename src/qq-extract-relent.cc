@@ -1,7 +1,7 @@
 // File: qq-extract-relent.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 28 May 2014 16:49:20 BST
+// Last Update: Wed 28 May 2014 17:21:36 BST
 
 // STL
 #include <iostream>
@@ -202,26 +202,29 @@ int main(int argc, char **argv)
     }
     VectorReal x(word_width);
     for (int j = 0; j < modelA.corpus.size(); ++j) {
-      backprop->forwardPropagate(j,&x);
-      if (types[j] == "e" or types[j] == "1" or types[j] == "2") {
-        if(!vm["external-names"].as<bool>()) {
-          ent_file << sentence_strings[j] << separator;
-        } else {
-          entname_file << sentence_strings[j] << endl;
+      // CHECK IF WORD EXISTS IN DICTIONARY FIRST! ( in !eas case)
+      if (vm["eas"].as<bool>() or (deA->dict_.id(sentence_strings[j]) != deA->dict_.m_bad_label)) {
+        backprop->forwardPropagate(j,&x);
+        if (types[j] == "e" or types[j] == "1" or types[j] == "2") {
+          if(!vm["external-names"].as<bool>()) {
+            ent_file << sentence_strings[j] << separator;
+          } else {
+            entname_file << sentence_strings[j] << endl;
+          }
+          ent_file << x[0];
+          for (int i = 1; i < word_width; ++i) { ent_file << separator << x[i]; }
+          ent_file << endl;
         }
-        ent_file << x[0];
-        for (int i = 1; i < word_width; ++i) { ent_file << separator << x[i]; }
-        ent_file << endl;
-      }
-      if (types[j] == "r") {
-        if(!vm["external-names"].as<bool>()) {
-          rel_file << sentence_strings[j] << separator;
-        } else {
-          relname_file << sentence_strings[j] << endl;
+        if (types[j] == "r") {
+          if(!vm["external-names"].as<bool>()) {
+            rel_file << sentence_strings[j] << separator;
+          } else {
+            relname_file << sentence_strings[j] << endl;
+          }
+          rel_file << x[0];
+          for (int i = 1; i < word_width; ++i) { rel_file << separator << x[i]; }
+          rel_file << endl;
         }
-        rel_file << x[0];
-        for (int i = 1; i < word_width; ++i) { rel_file << separator << x[i]; }
-        rel_file << endl;
       }
     }
   }
