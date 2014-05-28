@@ -1,7 +1,7 @@
 // File: qq-extract-relent.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 26 May 2014 16:59:06 BST
+// Last Update: Wed 28 May 2014 16:49:20 BST
 
 // STL
 #include <iostream>
@@ -32,6 +32,7 @@
 #include "common/config.h"
 #include "common/models.h"
 #include "common/load_relent.h"
+#include "common/load_plain.h"
 
 #include "common/senna.h"
 #include "common/reindex_dict.h"
@@ -74,8 +75,14 @@ int main(int argc, char **argv)
      "prefix for output files <pre>.ent and <pre>.rel")
     ("embeddings", bpo::value<int>()->default_value(-1),
      "use embeddings for baseline dictionary (0=senna,1=turian,2=cldc-en,3=cldc-de)")
-    ("tab", bpo::value<bool>()->default_value(false),
-     "tab-separate output and add header row")
+    ("format", bpo::value<int>()->default_value(0),
+     "output format: 0=space separate, 1=tab separator")
+    ("header", bpo::value<bool>()->default_value(false),
+     "include header row")
+    ("external-names", bpo::value<bool>()->default_value(false),
+     "include names as first column OR output into separate files")
+    ("eas", bpo::value<bool>()->default_value(true),
+     "treat entities as string concatenations (true) or as unigram (false)?")
     ;
   bpo::options_description all_options;
   all_options.add(generic).add(cmdline_specific);
@@ -127,7 +134,11 @@ int main(int argc, char **argv)
   Senna sennaA(*deA,embeddings);
 
   assert(!inputA.empty());
-  load_relent::load_file(modelA.corpus, inputA, create_new_dict, sennaA);
+  // Load with relent (treat as set of strings) or plain (treat as unique type)
+  if ( vm["eas"].as<bool>() )
+    load_relent::load_file(modelA.corpus, inputA, create_new_dict, sennaA);
+  else
+    load_plain::load_file(modelA.corpus, inputA, 0, create_new_dict, sennaA);
 
   modelA.rae = &raeA;
   modelA.rae->de_ = deA;
@@ -160,30 +171,56 @@ int main(int argc, char **argv)
   fs::path ent_file_path(vm["prefix"].as<string>() + ".ent");
   fs::ofstream rel_file(rel_file_path);
   fs::ofstream ent_file(ent_file_path);
+  fs::path relname_file_path(vm["prefix"].as<string>() + ".relname");
+  fs::path entname_file_path(vm["prefix"].as<string>() + ".entname");
+  fs::ofstream relname_file(relname_file_path);
+  fs::ofstream entname_file(entname_file_path);
+
+  string separator = " ";
+  if (vm["format"].as<int>() == 1)
+    separator = "\t";
+
   {
     // Forward propagate all sentences and store their resulting vector in
     // the document model dictionary.
-    string separator = " ";
-    if (vm["tab"].as<bool>()) {
-      separator = "\t";
-      rel_file << "Name";
-      for (int j = 0; j < word_width; ++j) rel_file << "\t" << j;
+    if (vm["header"].as<bool>()) {
+      if(!vm["external-names"].as<bool>()) {
+        rel_file << "Name" << "\t";
+        ent_file << "Name" << "\t";
+      } else {
+        relname_file << "Name" << endl;
+        entname_file << "Name" << endl;
+      }
+      rel_file << 0;
+      ent_file << 0;
+      for (int j = 1; j < word_width; ++j) {
+        rel_file << "\t" << j;
+        ent_file << "\t" << j;
+      }
       rel_file << endl;
-      ent_file << "Name";
-      for (int j = 0; j < word_width; ++j) ent_file << "\t" << j;
       ent_file << endl;
     }
     VectorReal x(word_width);
     for (int j = 0; j < modelA.corpus.size(); ++j) {
       backprop->forwardPropagate(j,&x);
-      if (types[j] == "e") {
-        ent_file << sentence_strings[j];
-        for (int i = 0; i < word_width; ++i) { ent_file << separator << x[i]; }
+      if (types[j] == "e" or types[j] == "1" or types[j] == "2") {
+        if(!vm["external-names"].as<bool>()) {
+          ent_file << sentence_strings[j] << separator;
+        } else {
+          entname_file << sentence_strings[j] << endl;
+        }
+        ent_file << x[0];
+        for (int i = 1; i < word_width; ++i) { ent_file << separator << x[i]; }
         ent_file << endl;
       }
       if (types[j] == "r") {
-        rel_file << sentence_strings[j];
-        for (int i = 0; i < word_width; ++i) { rel_file << separator << x[i]; }
+        if(!vm["external-names"].as<bool>()) {
+          rel_file << sentence_strings[j] << separator;
+        } else {
+          relname_file << sentence_strings[j] << endl;
+        }
+        rel_file << x[0];
+        for (int i = 1; i < word_width; ++i) { rel_file << separator << x[i]; }
         rel_file << endl;
       }
     }
@@ -191,4 +228,6 @@ int main(int argc, char **argv)
   delete backprop;
   rel_file.close();
   ent_file.close();
+  relname_file.close();
+  entname_file.close();
 }
