@@ -1,7 +1,7 @@
 // File: dictionary_embeddings.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 14 May 2014 11:59:25 BST
+// Last Update: Wed 28 May 2014 19:20:34 BST
 
 #ifndef COMMON_DICTIONARY_EMBEDDINGS_H
 #define COMMON_DICTIONARY_EMBEDDINGS_H
@@ -63,6 +63,7 @@ class DictionaryEmbeddings {
   friend class Senna; // can create and modify the dictionary.
   friend class Trainer;
   friend class OpenQATrainer;
+  friend class OpenQABordesTrainer;
   friend class GeneralTrainer;
   friend RecursiveAutoencoderBase* reindex_dict(RecursiveAutoencoderBase& rae,
                                                 TrainingCorpus& trainC,
