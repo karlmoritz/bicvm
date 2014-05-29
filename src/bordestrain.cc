@@ -1,7 +1,7 @@
 // File: bordestrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 29 May 2014 13:48:32 BST
+// Last Update: Thu 29 May 2014 15:09:35 BST
 
 // STL
 #include <iostream>
@@ -77,9 +77,9 @@ int main(int argc, char **argv)
   generic.add_options()
     ("type", bpo::value<string>()->default_value("additive"),
      "type of model (additive, flattree, ...)")
-    ("input", bpo::value<string>()->default_value(""),
+    ("input-qq", bpo::value<string>()->default_value(""),
      "question query corpus (tab separated question query).")
-    ("input2", bpo::value<string>()->default_value(""),
+    ("input-pp", bpo::value<string>()->default_value(""),
      "paraphrase corpus (tab separated sentences).")
 
     ("model-in", bpo::value<string>(),
@@ -356,20 +356,18 @@ int main(int argc, char **argv)
 
   Model modelA, modelB, modelPPA, modelPPB;
 
-  string input = vm["input"].as<string>();
-  string input2 = vm["input2"].as<string>();
-
   int embeddings_typeA = vm["embeddings"].as<int>();
   int embeddings_typeB = -1;
   if (embeddings_typeA == 2) embeddings_typeB = 3;
 
   {
     Senna sennaA(*deA,embeddings_typeA);
-    // Senna sennaB(*deB,embeddings_typeB);
-    assert(!input.empty());
-    load_qq::load_file(modelA.corpus, modelB.corpus, input, create_new_dict,
+
+    load_qq::load_file(modelA.corpus, modelB.corpus,
+                       vm["input-qq"].as<string>(), create_new_dict,
                        create_new_dict, sennaA, sennaA);
-    load_qq::load_file(modelPPA.corpus, modelPPB.corpus, input2, create_new_dict,
+    load_qq::load_file(modelPPA.corpus, modelPPB.corpus,
+                       vm["input-pp"].as<string>(), create_new_dict,
                        create_new_dict, sennaA, sennaA);
 
     cout << "L1 Size " << modelA.corpus.size() << endl;
@@ -515,14 +513,8 @@ int main(int argc, char **argv)
    ***************************************************************************/
 
   {
-    std::ofstream ofs(vm["model1-out"].as<string>());
+    std::ofstream ofs(vm["model-out"].as<string>());
     boost::archive::text_oarchive oa(ofs);
     oa << *(modelA.rae) << *(modelA.rae->de_);
-  }
-
-  {
-    std::ofstream ofs(vm["model2-out"].as<string>());
-    boost::archive::text_oarchive oa(ofs);
-    oa << *(modelB.rae) << *(modelB.rae->de_);
   }
 }

@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 28 May 2014 19:09:58 BST
+// Last Update: Thu 29 May 2014 14:17:54 BST
 
 #ifndef COMMON_OPENQA_BORDES_TRAINER_H
 #define COMMON_OPENQA_BORDES_TRAINER_H
@@ -25,12 +25,12 @@ class OpenQABordesTrainer : public Trainer {
   void computeBiCostAndGrad(
       Model &modelA,
       Model &modelB,
-      const Real *x,
       Real *gradient_location,
       int n,
       int iteration,
       BProps& prop,
-      Real* error);
+      Real* error,
+      bool near_noise);
 
   void testModel(Model &model);
 

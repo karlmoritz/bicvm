@@ -1,7 +1,7 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Wed 14 May 2014 13:37:11 BST
+// Last Update: Thu 29 May 2014 15:03:16 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
@@ -9,6 +9,7 @@
 // Local
 #include "shared_defs.h"
 #include "recursive_autoencoder.h"
+#include "singlepropbase.h"
 
 class Trainer;
 class GeneralTrainer;
@@ -40,6 +41,9 @@ public:
 
   // Forward propagates, returns propagated singleprop for further manipulation.
   SinglePropBase* forwardPropagate(int i, VectorReal* x);
+
+  // Forward propagates a sentence that is 66% noise and 33% truth or such.
+  SinglePropBase* noisyForwardPropagate(int noise, int truth, VectorReal* x);
 
   // Forward propagates, backprop with autoencoder error. Stores error and
   // gradients in internal variables and sets x to the root encoding.
@@ -76,6 +80,8 @@ protected:
   Real error_;
   int word_width;
   int dict_size;
+
+  Sentence corrupt;
 
   // Counter for nodes and words used for normalization.
   int count_nodes_;

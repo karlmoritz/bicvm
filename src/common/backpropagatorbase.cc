@@ -1,15 +1,16 @@
 // File: backpropagatorbase.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 18-06-2013
-// Last Update: Wed 14 May 2014 09:59:15 BST
+// Last Update: Thu 29 May 2014 15:12:33 BST
+
+#include <random>
 
 #include "backpropagatorbase.h"
-
-#include "singlepropbase.h"
 
 BackpropagatorBase::BackpropagatorBase (RecursiveAutoencoderBase* rae,
                                         const Model &model)
   : rae_(rae), model(model), weights(0,0), dict_weights(0,0), error_(0.0),
+  corrupt(0),
   count_nodes_(0), count_words_(0),
   correctly_classified_sent(0), zero_should_be_one(0), zero_should_be_zero(0),
   one_should_be_zero(0), one_should_be_one(0), is_a_zero(0), is_a_one(0) {
@@ -27,6 +28,26 @@ BackpropagatorBase::~BackpropagatorBase () {
 
 SinglePropBase* BackpropagatorBase::forwardPropagate(int i, VectorReal* x) {
   singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->forwardPropagate(false);
+  singleprop->setToD(x,0);
+  return singleprop;
+}
+
+SinglePropBase* BackpropagatorBase::noisyForwardPropagate(int noise, int truth, VectorReal* x) {
+  // DANGER: does not check whether noise and truth have the same lengh. This is
+  // assumed.
+  corrupt = model.corpus[noise];
+  assert (model.corpus[noise].words.size() == model.corpus[truth].words.size());
+  // std::random_device rd;
+  // std::mt19937 gen(rd());
+  std::mt19937 gen(0);
+  std::uniform_real_distribution<> d_sud(0,1);    // Matlab rand / standard uniform distribution
+  for (int i = 0; i < corrupt.words.size(); ++i) {
+    if (d_sud(gen) > 0.66) {
+      corrupt.words[i] = model.corpus[truth].words[i];
+    }
+  }
+  singleprop->loadWithSentence(corrupt);
   singleprop->forwardPropagate(false);
   singleprop->setToD(x,0);
   return singleprop;

@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Thu 29 May 2014 13:50:54 BST
+// Last Update: Thu 29 May 2014 15:15:03 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -25,19 +25,20 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
   WeightVectorType zeroMe(gradient_location,n); zeroMe.setZero(); // set gradients to zero.
 
   // Question - Query
-  computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
-  // Question - Question
+  computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, true);
+
+  // Question - Question Paraphrases
   int modsize_A = model.rae->getThetaSize();
   int modsize_B = model.b->rae->getThetaSize();
   Real* ptr = gradient_location;
   ptr += modsize_A + modsize_B;
   int m = n - modsize_A - modsize_B;
-  computeBiCostAndGrad(*model.docmod, *(model.b->docmod), nullptr, ptr, m, iteration, *props.docprop, error);
+  computeBiCostAndGrad(*model.docmod, *(model.b->docmod), ptr, m, iteration, *props.docprop, error, false);
 }
 
-void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
+void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
                           Real *gradient_location, int n, int iteration,
-                          BProps &prop, Real* error) {
+                          BProps &prop, Real* error, bool near_noise) {
 
   int modsize_A = modelA.rae->getThetaSize();
   int modsize_B = modelB.rae->getThetaSize();
@@ -100,7 +101,9 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
           +modelA.from];
 
         VectorReal noise_root(modelA.rae->config.word_representation_size);
-        SinglePropBase* noise = prop.propB->forwardPropagate(noise_int, &noise_root);
+        SinglePropBase* noise = (near_noise)
+          ? prop.propB->noisyForwardPropagate(noise_int, j, &noise_root)
+          : prop.propB->forwardPropagate(noise_int, &noise_root);
 
         Real hinge = modelA.rae->config.hinge_loss_margin + 0.5 * (rootA - rootB).squaredNorm() - 0.5 * (rootA - noise_root).squaredNorm();
         if (hinge > 0) {
@@ -149,6 +152,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
           +modelA.from];
 
         VectorReal noise_root(modelA.rae->config.word_representation_size);
+        // SinglePropBase* noise = prop.propA->forwardPropagate(noise_int, &noise_root);
         SinglePropBase* noise = prop.propA->forwardPropagate(noise_int, &noise_root);
 
         Real hinge = modelA.rae->config.hinge_loss_margin + 0.5 * (rootB - rootA).squaredNorm() - 0.5 * (rootB - noise_root).squaredNorm();
