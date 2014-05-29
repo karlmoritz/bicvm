@@ -1,7 +1,7 @@
 // File: finite_grad_check.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 14:34:20 BST
+// Last Update: Thu 29 May 2014 10:19:51 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -129,7 +129,8 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   int extended_vars = double_vars;
   if (model.docmod != nullptr) {
     extended_vars += model.docmod->rae->getThetaSize() +
-      model.b->docmod->rae->getThetaSize();
+      model.docmod->rae->getThetaDSize() +
+      model.b->docmod->rae->getThetaSize() +
       model.b->docmod->rae->getThetaDSize();
   }
   Real* data1 = new Real[extended_vars]();
