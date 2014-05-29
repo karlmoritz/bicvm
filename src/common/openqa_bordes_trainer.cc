@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Thu 29 May 2014 15:16:53 BST
+// Last Update: Thu 29 May 2014 15:29:08 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -195,24 +195,24 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
     // L2 cost after normalization.
 #pragma omp critical
     {
-      // speedup if I make this "single nowait" and dump onto my own bprop?
-      // would require pushing Real* data into bpropbase.
-    if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
-    if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
-    if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
-    if (modelB.calc_L2) *error += modelB.rae->de_->getLambdaCost(modelB.bools, modelA.lambdas);
+      if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
+      if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
 
-    ptr = gradient_location;
-    if (modelA.calc_L2) modelA.rae->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
-    ptr += modsize_A;
-    if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
-    ptr += modsize_B;
-    if (modelA.docmod) { // If we have docmods, we need to skip over those.
-     ptr += modelA.docmod->rae->getThetaSize();
-     ptr += modelB.docmod->rae->getThetaSize();
-    }
-    if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
-    ptr += dictsize_A;
+      ptr = gradient_location;
+      if (modelA.calc_L2) modelA.rae->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+      ptr += modsize_A;
+      if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
+      ptr += modsize_B;
+
+      if (modelA.docmod) {
+        // If we have docmods we
+        //  (a) need to skip over those to get to the dictionary.
+        //  (b) consider the dictionary L2 (to make sure we only do this once)
+        ptr += modelA.docmod->rae->getThetaSize();
+        ptr += modelB.docmod->rae->getThetaSize();
+        if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
+        if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+      }
     }
   }
 }
@@ -235,8 +235,8 @@ void OpenQABordesTrainer::testModel(Model &model) {
   for (auto i = 0; i<num_sentences; ++i) {
     int j = model.indexes[i];
     SinglePropBase* propagator = model.rae->getSingleProp(model.corpus[j].words.size(),
-        model.corpus[j].nodes.size(),
-        0.5,model.bools);
+                                                          model.corpus[j].nodes.size(),
+                                                          0.5,model.bools);
     propagator->loadWithSentence(model.corpus[j]);
     propagator->forwardPropagate(false);
 #pragma omp critical
