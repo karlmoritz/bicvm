@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Thu 29 May 2014 13:42:49 BST
+// Last Update: Thu 29 May 2014 13:50:54 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -25,7 +25,7 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
   WeightVectorType zeroMe(gradient_location,n); zeroMe.setZero(); // set gradients to zero.
 
   // Question - Query
-  // computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
+  computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
   // Question - Question
   int modsize_A = model.rae->getThetaSize();
   int modsize_B = model.b->rae->getThetaSize();
