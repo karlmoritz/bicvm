@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 12:40:39 BST
+// Last Update: Thu 29 May 2014 15:23:48 BST
 
 // STL
 #include <iostream>
@@ -116,6 +116,10 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int bat
           model.trainer->testModel(*tmodel);
           cout << endl;
         }
+      }
+#pragma omp single
+      {
+        cout << "Error\t" << error << endl;
       }
       if ((iteration+1) % model.rae->config.dump_freq == 0) {
 #pragma omp single
