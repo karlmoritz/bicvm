@@ -1,15 +1,7 @@
 // File: finite_grad_check.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 29 May 2014 10:19:51 BST
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Thu 29 May 2014 13:41:02 BST
 
 // STL
 #include <iostream>
@@ -107,6 +99,7 @@ void finite_grad_check(Model &model, Lambdas lambdas)
 
 void finite_bigrad_check(Model &model, Lambdas lambdas)
 {
+  // Find space for all variables.
   Real* vars = nullptr;
   Real* varsX = nullptr;
 
@@ -122,8 +115,6 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   int number_dA = model.rae->getThetaDSize();
   int number_dB = model.b->rae->getThetaDSize();
   int double_vars = number_vars + number_varsB + number_dA + number_dB;
-
-  // cout.precision(15);
 
   WeightVectorType theta(vars,double_vars);
   int extended_vars = double_vars;
@@ -269,6 +260,145 @@ void finite_bigrad_check(Model &model, Lambdas lambdas)
   cout << distsB.Wf << " ";
   cout << distsB.Wl << " ";
   cout << distsB.Bl << endl;
+  // Don't care about what's next
+  assert(false);
+}
+
+void finite_quad_check(Model &model, Lambdas lambdas)
+{
+  // Find space for all variables.
+  Real* theta_ptr = nullptr;
+  Real* tmp = nullptr;
+
+  model.lambdas = lambdas;
+
+  int number_vars_A = 0;
+  modvars<int> counts_A;
+  model.rae->setIncrementalCounts(&counts_A, theta_ptr, number_vars_A);
+
+  int number_vars_B = 0;
+  modvars<int> counts_B;
+  model.b->rae->setIncrementalCounts(&counts_B, tmp, number_vars_B);
+
+  int number_vars_C = 0;
+  modvars<int> counts_C;
+  model.b->docmod->rae->setIncrementalCounts(&counts_C, tmp, number_vars_C);
+
+  int number_vars_D = 0;
+  modvars<int> counts_D;
+  model.docmod->rae->setIncrementalCounts(&counts_D, tmp, number_vars_D);
+
+  int number_dict = model.rae->getThetaDSize();
+
+  int model_vars = number_vars_A + number_vars_B + number_vars_C + number_vars_D
+    + number_dict;
+
+  WeightVectorType theta(theta_ptr, model_vars);  // model variables.
+
+  Real* data1 = new Real[model_vars]();  // storage for gradients from vanilla run
+  Real* data2 = new Real[model_vars]();  // spaceholder for subsequent gradients
+  WeightVectorType grad(data1,model_vars);  // gradient location
+
+  Real error1 = 0.0, error2 = 0.0;
+#pragma omp parallel
+  {
+    BProps props(model);
+    Real errorX = 0;
+    model.trainer->computeCostAndGrad(model,nullptr,data1,model_vars,0,props,&errorX);
+#pragma omp critical
+    {
+      error1 += errorX;
+    }
+  }
+
+  // Divergences between model and true gradient.
+  modvars<Real> dists_A, dists_B, dists_C, dists_D;
+  dists_A.init();
+  dists_B.init();
+  dists_C.init();
+  dists_D.init();
+
+  Real dist = 0.0;
+  Real delta = 0.001;
+  int j = 0;
+
+  for (int i=0; i<model_vars; ++i) {
+    theta[i] += delta;  // Increase by delta.
+    error2 = 0.0;
+#pragma omp parallel
+    {
+      BProps props(model);
+      Real errorX = 0;
+      model.trainer->computeCostAndGrad(model,nullptr,data2,model_vars,0,props,&errorX);
+#pragma omp critical
+      {
+        error2 += errorX;
+      }
+    }
+    Real xdev = (Real)((error2 - error1) / delta);
+    theta[i] -= delta;  // Reset model variables to original state.
+    j = i - number_vars_A;
+    if (i < counts_A.U)  { dists_A.U += abs(grad[i] - xdev);  cout << "U  "; }
+    else if (i < counts_A.V)  { dists_A.V += abs(grad[i] - xdev);  cout << "V  "; }
+    else if (i < counts_A.W)  { dists_A.W += abs(grad[i] - xdev);  cout << "W  "; }
+    else if (i < counts_A.A)  { dists_A.A += abs(grad[i] - xdev);  cout << "A  "; }
+    else if (i < counts_A.Wd)  { dists_A.Wd += abs(grad[i] - xdev);  cout << "Wd  "; }
+    else if (i < counts_A.Wdr) { dists_A.Wdr += abs(grad[i] - xdev); cout << "Wdr "; }
+    else if (i < counts_A.Bd)  { dists_A.Bd += abs(grad[i] - xdev);  cout << "Bd  "; }
+    else if (i < counts_A.Bdr) { dists_A.Bdr += abs(grad[i] - xdev); cout << "Bdr "; }
+    else if (i < counts_A.Wf)  { dists_A.Wf += abs(grad[i] - xdev);  cout << "Wf  "; }
+    else if (i < counts_A.Wl)  { dists_A.Wl += abs(grad[i] - xdev);  cout << "Wl  "; }
+    else if (i < counts_A.Bl)  { dists_A.Bl += abs(grad[i] - xdev);  cout << "Bl  "; }
+
+    else if (j < counts_B.U)  { dists_B.U += abs(grad[i] - xdev);  cout << "2U  "; }
+    else if (j < counts_B.V)  { dists_B.V += abs(grad[i] - xdev);  cout << "2V  "; }
+    else if (j < counts_B.W)  { dists_B.W += abs(grad[i] - xdev);  cout << "2W  "; }
+    else if (j < counts_B.A)  { dists_B.A += abs(grad[i] - xdev);  cout << "2A  "; }
+    else if (j < counts_B.Wd)  { dists_B.Wd += abs(grad[i] - xdev);  cout << "2Wd  "; }
+    else if (j < counts_B.Wdr) { dists_B.Wdr += abs(grad[i] - xdev); cout << "2Wdr "; }
+    else if (j < counts_B.Bd)  { dists_B.Bd += abs(grad[i] - xdev);  cout << "2Bd  "; }
+    else if (j < counts_B.Bdr) { dists_B.Bdr += abs(grad[i] - xdev); cout << "2Bdr "; }
+    else if (j < counts_B.Wf)  { dists_B.Wf += abs(grad[i] - xdev);  cout << "2Wf  "; }
+    else if (j < counts_B.Wl)  { dists_B.Wl += abs(grad[i] - xdev);  cout << "2Wl  "; }
+    else if (j < counts_B.Bl)  { dists_B.Bl += abs(grad[i] - xdev);  cout << "2Bl  "; }
+
+    else if (j < (number_vars_B + number_dict))   { dists_A.D += abs(grad[i] - xdev);   cout << "D   "; }
+    // CLEAN THIS UP WITH NUMBERS FOR THE OTHER TWO MODELS etc.
+    else  { dists_A.D += abs(grad[i] - xdev);   cout << "D   "; }
+    // else if (j < (number_vars_B + number_dA + number_dB))   { dists_B.D += abs(grad[i] - xdev);   cout << "2D  "; }
+
+    // else  { cout << "ERROR  " << endl; assert(false); }
+    cout << i << ": (observed)\t" << grad[i] << " vs " << (xdev) << "\t(Error-diff)\t" << error1 << "\t" << error2 << endl;
+
+    dist += abs(grad[i] - xdev);
+  }
+
+  cout << "total: " << dist << " D/U/V/W/A/Wd/Wdr/Bd/Bdr/Wf/Wl/Bl " << endl;
+  cout << dists_A.D << " ";
+  cout << dists_A.U << " ";
+  cout << dists_A.V << " ";
+  cout << dists_A.W << " ";
+  cout << dists_A.A << " ";
+  cout << dists_A.Wd << " ";
+  cout << dists_A.Wdr << " ";
+  cout << dists_A.Bd << " ";
+  cout << dists_A.Bdr << " ";
+  cout << dists_A.Wf << " ";
+  cout << dists_A.Wl << " ";
+  cout << dists_A.Bl << endl;
+
+  cout << dists_B.D << " ";
+  cout << dists_B.U << " ";
+  cout << dists_B.V << " ";
+  cout << dists_B.W << " ";
+  cout << dists_B.A << " ";
+  cout << dists_B.Wd << " ";
+  cout << dists_B.Wdr << " ";
+  cout << dists_B.Bd << " ";
+  cout << dists_B.Bdr << " ";
+  cout << dists_B.Wf << " ";
+  cout << dists_B.Wl << " ";
+  cout << dists_B.Bl << endl;
   // Don't care about what's next
   assert(false);
 }

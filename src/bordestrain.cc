@@ -1,7 +1,7 @@
 // File: bordestrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 28 May 2014 19:13:44 BST
+// Last Update: Thu 29 May 2014 13:48:32 BST
 
 // STL
 #include <iostream>
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
     assert(!input.empty());
     load_qq::load_file(modelA.corpus, modelB.corpus, input, create_new_dict,
                        create_new_dict, sennaA, sennaA);
-    load_qq::load_file(modelPPA.corpus, modelPPB.corpus, input, create_new_dict,
+    load_qq::load_file(modelPPA.corpus, modelPPB.corpus, input2, create_new_dict,
                        create_new_dict, sennaA, sennaA);
 
     cout << "L1 Size " << modelA.corpus.size() << endl;
@@ -399,6 +399,10 @@ int main(int argc, char **argv)
   modelA.rae->alpha_lbl = lambdas.alpha_lbl;
   modelB.rae->alpha_rae = lambdas.alpha_rae;
   modelB.rae->alpha_lbl = lambdas.alpha_lbl;
+  modelPPA.rae->alpha_rae = lambdas.alpha_rae;
+  modelPPA.rae->alpha_lbl = lambdas.alpha_lbl;
+  modelPPB.rae->alpha_rae = lambdas.alpha_rae;
+  modelPPB.rae->alpha_lbl = lambdas.alpha_lbl;
 
   // Associate dictionaries with RAEs.
   modelA.rae->de_ = deA; //reindex_dict(*deA,modelA.corpus);
@@ -422,6 +426,8 @@ int main(int argc, char **argv)
   modelPPB.rae->moveToAddress(theta + offset);
   offset += modelPPB.rae->getThetaSize();
   modelA.rae->de_->moveToAddress(theta + offset);
+  offset += modelA.rae->de_->getThetaSize();
+  assert ( offset == ab_size );
 
   // Sets some model parameters such as maximum sentence and node length to
   // speed up memory access and parallelisation later on.
@@ -450,7 +456,7 @@ int main(int argc, char **argv)
   modelB.to = modelB.corpus.size();
   modelB.num_noise_samples = vm["noise"].as<int>();
 
-  modelPPA.bools = bools2;
+  modelPPA.bools = bools1;
   modelPPA.alpha = alpha;
   modelPPA.gamma = gamma;
   modelPPA.from = 0;
@@ -490,7 +496,7 @@ int main(int argc, char **argv)
   {
     cout << "Finite Gradient Check" << endl;
     // train_adagrad(modelA,3,eta,nullptr,batches,lambdas,l1);
-    finite_bigrad_check(modelA,lambdas);
+    finite_quad_check(modelA,lambdas);
   }
   else if (config.training_method == 3)
   {

@@ -1,24 +1,17 @@
 // File: finite_grad_check.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-01-2013
-// Last Update: Thu 17 Oct 2013 03:39:20 PM BST
-/*------------------------------------------------------------------------
- * Description: <DESC>
- *
- *------------------------------------------------------------------------
- * History:
- * TODO:
- *========================================================================
- */
+// Last Update: Thu 29 May 2014 11:30:31 BST
 
-#ifndef FINITE_GRAD_CHECK_H_EPMOQDQN
-#define FINITE_GRAD_CHECK_H_EPMOQDQN
+#ifndef COMMON_FINITE_GRAD_CHECK_H
+#define COMMON_FINITE_GRAD_CHECK_H
 
 // Local
 #include "shared_defs.h"
 
 void finite_grad_check(Model &model, Lambdas lambdas);
 void finite_bigrad_check(Model &model, Lambdas lambdas);
+void finite_quad_check(Model &model, Lambdas lambdas);
 
-#endif /* end of include guard: FINITE_GRAD_CHECK_H_EPMOQDQN */
+#endif  // COMMON_FINITE_GRAD_CHECK_H
 

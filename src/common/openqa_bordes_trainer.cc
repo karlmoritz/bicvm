@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 28 May 2014 19:57:43 BST
+// Last Update: Thu 29 May 2014 13:42:49 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -14,18 +14,25 @@
 void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
                         int n, int iteration, BProps& props, Real* error)
 {
+  assert(props.propB != nullptr);
+  assert(props.docprop != nullptr);
+
   props.propA->reset();
-  if (props.propB != nullptr) { props.propB->reset(); }
-  if (props.docprop != nullptr) { props.docprop->propA->reset(); props.docprop->propB->reset(); }
+  props.propB->reset();
+  props.docprop->propA->reset();
+  props.docprop->propB->reset();
+
+  WeightVectorType zeroMe(gradient_location,n); zeroMe.setZero(); // set gradients to zero.
+
   // Question - Query
-  computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
+  // computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
   // Question - Question
   int modsize_A = model.rae->getThetaSize();
   int modsize_B = model.b->rae->getThetaSize();
   Real* ptr = gradient_location;
   ptr += modsize_A + modsize_B;
   int m = n - modsize_A - modsize_B;
-  computeBiCostAndGrad(*model.docmod, *(model.b->docmod), x, ptr, m, iteration, props, error);
+  computeBiCostAndGrad(*model.docmod, *(model.b->docmod), nullptr, ptr, m, iteration, *props.docprop, error);
 }
 
 void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
@@ -50,14 +57,14 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
   WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
   assert (gradient_location + n == ptr);
 
-#pragma omp single
-  {
-    weightsA.setZero();
-    weightsB.setZero();
-    dweightsA.setZero();
-  }
-
-  assert (gradient_location + n == ptr);
+/*
+ * #pragma omp single
+ *   {
+ *     weightsA.setZero();
+ *     weightsB.setZero();
+ *     dweightsA.setZero();
+ *   }
+ */
 
   Real gamma = modelA.gamma;
 
@@ -75,8 +82,9 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
       SinglePropBase* other = prop.propB->forwardPropagate(j,&rootB);
 
       // The "normal" biprop: backprop self given the other root and vice versa
-      // prop.propA->backPropagateBi(j,&rootA,rootB); // inefficient (repeats fprop)
-      // prop.propB->backPropagateBi(j,&rootB,rootA);
+      // ARGH ARGH ARGH ARGH
+      prop.propA->backPropagateBi(j,&rootA,rootB); // inefficient (repeats fprop)
+      prop.propB->backPropagateBi(j,&rootB,rootA);
 
       VectorReal combined_noise_root(modelA.rae->config.word_representation_size);
       combined_noise_root.setZero();
@@ -104,7 +112,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
           prop.propB->addCountsAndGradsForGiven(noise_int, noise);
         }
       }
-      if (noise_count > 0 || (modelA.docmod != nullptr && iteration > 0)) {
+      if (noise_count > 0) {
         prop.propA->addError(0.5*gamma*noise_error);
         prop.propB->addError(0.5*gamma*noise_error);
         SinglePropBase* selff = prop.propA->forwardPropagate(j,&rootA);
@@ -124,8 +132,8 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
       SinglePropBase* other = prop.propA->forwardPropagate(j,&rootA);
 
       // Do the "normal" biprop: backprop self given the other root and vice
-      // prop.propB->backPropagateBi(j,&rootB,rootA); // inefficient (repeats fprop)
-      // prop.propA->backPropagateBi(j,&rootA,rootB);
+      prop.propB->backPropagateBi(j,&rootB,rootA); // inefficient (repeats fprop)
+      prop.propA->backPropagateBi(j,&rootA,rootB);
 
       VectorReal combined_noise_root(modelA.rae->config.word_representation_size);
       combined_noise_root.setZero();
@@ -133,7 +141,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
       int noise_count = 0.0;
 
       for (int n = 0; n < modelA.num_noise_samples; ++n) {
-        int noise_int =  modelA.indexes[
+        int noise_int = modelA.indexes[
           (
               i - modelA.from + 1 +
               ( modelA.noise_sample_offset*(n+1) )%(modelA.to-modelA.from-1)
@@ -142,6 +150,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
 
         VectorReal noise_root(modelA.rae->config.word_representation_size);
         SinglePropBase* noise = prop.propA->forwardPropagate(noise_int, &noise_root);
+
         Real hinge = modelA.rae->config.hinge_loss_margin + 0.5 * (rootB - rootA).squaredNorm() - 0.5 * (rootB - noise_root).squaredNorm();
         if (hinge > 0) {
           noise_error += hinge;
@@ -151,7 +160,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
           prop.propA->addCountsAndGradsForGiven(noise_int, noise);
         }
       }
-      if (noise_count > 0 || (modelB.docmod != nullptr && iteration > 0)) {
+      if (noise_count > 0) {
         prop.propB->addError(0.5*gamma*noise_error);
         prop.propA->addError(0.5*gamma*noise_error);
         // Add docmod gradient and error!
@@ -174,33 +183,37 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, con
     weightsA += prop.propA->dumpWeights();
     weightsB += prop.propB->dumpWeights();
     dweightsA += prop.propA->dumpDict();
+    dweightsA += prop.propB->dumpDict();
   }
 
-#pragma omp single
-  {
-    // L2 cost after normalization.
-#pragma omp critical
-    {
-      // speedup if I make this "single nowait" and dump onto my own bprop?
-      // would require pushing Real* data into bpropbase.
-    if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
-    if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
-    if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
-    if (modelB.calc_L2) *error += modelB.rae->de_->getLambdaCost(modelB.bools, modelA.lambdas);
-
-    ptr = gradient_location;
-    if (modelA.calc_L2) modelA.rae->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
-    ptr += modsize_A;
-    if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
-    ptr += modsize_B;
-    if (modelA.docmod) { // If we have docmods, we need to skip over those.
-     ptr += modelA.docmod->rae->getThetaSize();
-     ptr += modelB.docmod->rae->getThetaSize();
-    }
-    if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
-    ptr += dictsize_A;
-    }
-  }
+/*
+ * // REINSTATE THIS IN A SECOND. Doesn't affect the bug.
+ * #pragma omp single
+ *   {
+ *     // L2 cost after normalization.
+ * #pragma omp critical
+ *     {
+ *       // speedup if I make this "single nowait" and dump onto my own bprop?
+ *       // would require pushing Real* data into bpropbase.
+ *     if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
+ *     if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
+ *     if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
+ *     if (modelB.calc_L2) *error += modelB.rae->de_->getLambdaCost(modelB.bools, modelA.lambdas);
+ *
+ *     ptr = gradient_location;
+ *     if (modelA.calc_L2) modelA.rae->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+ *     ptr += modsize_A;
+ *     if (modelB.calc_L2) modelB.rae->addLambdaGrad(ptr, modelB.bools, modelA.lambdas);
+ *     ptr += modsize_B;
+ *     if (modelA.docmod) { // If we have docmods, we need to skip over those.
+ *      ptr += modelA.docmod->rae->getThetaSize();
+ *      ptr += modelB.docmod->rae->getThetaSize();
+ *     }
+ *     if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
+ *     ptr += dictsize_A;
+ *     }
+ *   }
+ */
 }
 
 void OpenQABordesTrainer::testModel(Model &model) {

@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 14 May 2014 16:22:14 BST
+// Last Update: Thu 29 May 2014 12:36:12 BST
 
 #include "openqa_trainer.h"
 
@@ -236,6 +236,7 @@ void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Rea
     weightsA += prop.propA->dumpWeights();
     weightsB += prop.propB->dumpWeights();
     dweightsA += prop.propA->dumpDict();
+    dweightsA += prop.propB->dumpDict(); // I think this is necessary.
   }
 
 #pragma omp single
