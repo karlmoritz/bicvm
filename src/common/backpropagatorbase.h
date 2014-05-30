@@ -1,10 +1,14 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Thu 29 May 2014 15:03:16 BST
+// Last Update: Fri 30 May 2014 13:17:10 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/variate_generator.hpp>
 
 // Local
 #include "shared_defs.h"
@@ -95,6 +99,10 @@ protected:
   int one_should_be_one;
   int is_a_zero;
   int is_a_one;
+
+  boost::mt19937 rnd_engine;
+  boost::uniform_int<> rnd_dist;
+  boost::variate_generator<boost::mt19937, boost::uniform_int<> > rnd_gen;
 
   SinglePropBase* singleprop;
 

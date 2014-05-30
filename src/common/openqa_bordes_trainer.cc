@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Thu 29 May 2014 15:29:08 BST
+// Last Update: Fri 30 May 2014 12:49:37 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -193,8 +193,8 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
 #pragma omp single
   {
     // L2 cost after normalization.
-#pragma omp critical
-    {
+// #pragma omp critical // WHY THE CRITICAL ON TOP?
+    // {
       if (modelA.calc_L2) *error += modelA.rae->getLambdaCost(modelA.bools, modelA.lambdas);
       if (modelB.calc_L2) *error += modelB.rae->getLambdaCost(modelB.bools, modelA.lambdas);
 
@@ -213,7 +213,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
         if (modelA.calc_L2) *error += modelA.rae->de_->getLambdaCost(modelA.bools, modelA.lambdas);
         if (modelA.calc_L2) modelA.rae->de_->addLambdaGrad(ptr, modelA.bools, modelA.lambdas);
       }
-    }
+    // }
   }
 }
 
