@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Thu 22 May 2014 11:44:28 BST
+// Last Update: Fri 30 May 2014 14:59:01 BST
 
 #include "recursive_autoencoder.h"
 
@@ -25,11 +25,13 @@ RecursiveAutoencoderBase* RecursiveAutoencoder::cloneEmpty()  {
 }
 
 BackpropagatorBase* RecursiveAutoencoder::getBackpropagator(const Model &model,
-                                                            int n)
+                                                            int n,
+                                                            Real* dictptr)
 {
-  BackpropagatorBase* bpb = new Backpropagator(this, model, n);
+  BackpropagatorBase* bpb = new Backpropagator(this, model, n, dictptr);
   return bpb;
 }
+
 SinglePropBase* RecursiveAutoencoder::getSingleProp(int sl, int nl, Real beta, Bools updates)
 {
   SinglePropBase* spb = new SingleProp(this, sl, nl, beta, updates);

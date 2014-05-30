@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 29 May 2014 15:23:48 BST
+// Last Update: Fri 30 May 2014 15:32:24 BST
 
 // STL
 #include <iostream>
@@ -26,7 +26,8 @@ using namespace std;
 namespace bpo = boost::program_options;
 
 
-int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int batches, Lambdas lambdas, Real l1)
+int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
+                  int batches, Lambdas lambdas, Real l1, bool shared_dicts)
 {
   Real* vars = nullptr;
   int number_vars = 0;
@@ -63,7 +64,7 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel, int bat
   {
     Real update;
     Real l1_reg, l1_batch;
-    BProps props = BProps(model);
+    BProps props = BProps(model,shared_dicts);
     for (auto iteration = 0; iteration < iterations; ++iteration) {
 #pragma omp master
       {

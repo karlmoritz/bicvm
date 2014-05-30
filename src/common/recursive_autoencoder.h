@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 28 May 2014 19:15:40 BST
+// Last Update: Fri 30 May 2014 15:07:34 BST
 
 #ifndef COMMON_RECURSIVE_AUTOENCODER_H
 #define COMMON_RECURSIVE_AUTOENCODER_H
@@ -55,7 +55,8 @@ class RecursiveAutoencoderBase {
   virtual void setIncrementalCounts(Counts *counts, Real *&vars,
                                     int &number) = 0;
   // type: rae=0, lbl=1, bi=2
-  virtual BackpropagatorBase* getBackpropagator(const Model &model, int n) = 0;
+  virtual BackpropagatorBase* getBackpropagator(const Model &model, int n,
+                                                Real* dictptr=nullptr) = 0;
   virtual SinglePropBase* getSingleProp(int sl, int nl, Real beta,
                                         Bools updates) = 0;
 

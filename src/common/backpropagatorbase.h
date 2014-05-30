@@ -1,7 +1,7 @@
 // File: backpropagatorbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Fri 30 May 2014 13:17:10 BST
+// Last Update: Fri 30 May 2014 15:14:53 BST
 
 #ifndef COMMON_BACKPROPAGATORBASE_H
 #define COMMON_BACKPROPAGATORBASE_H
@@ -64,6 +64,8 @@ public:
   // unfold given a root node, calculates sets gradient (A given B)
   void unfoldPropagateGiven(int i, SinglePropBase* other, VectorReal* gradient);
 
+  Real* getDataLink() { return data; }
+
   friend class Trainer;
   friend class OpenQATrainer;
   friend class GeneralTrainer;
@@ -105,6 +107,8 @@ protected:
   boost::variate_generator<boost::mt19937, boost::uniform_int<> > rnd_gen;
 
   SinglePropBase* singleprop;
+
+  Real* data;
 
 private:
   void backPropagateAEWrapper(int i, bool unfold, VectorReal* x);

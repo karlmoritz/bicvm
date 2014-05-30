@@ -1,7 +1,7 @@
 // File: singleprop.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 03-01-2013
-// Last Update: Thu 22 May 2014 11:51:41 BST
+// Last Update: Fri 30 May 2014 14:47:15 BST
 // Simple additive_avg model: Sum all vectors together and that's it.
 
 #ifndef MODELS_ADDITIVE_AVG_SINGLEPROP_H
@@ -19,6 +19,7 @@ class SingleProp : public SinglePropBase {
  public:
   SingleProp(RecursiveAutoencoderBase* rae, int sl, int nl, Real beta, Bools updates);
   /*virtual*/void loadWithSentence(const Sentence &t);
+  /*virtual*/void passDictLink(Real* data, int size);
   /*virtual*/void passDataLink(Real* data, int size);
 
   /*virtual*/void forwardPropagate(bool autoencode = false);

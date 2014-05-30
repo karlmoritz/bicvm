@@ -1,7 +1,7 @@
 // File: backpropagator.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 22-04-2013
-// Last Update: Thu 22 May 2014 11:44:28 BST
+// Last Update: Fri 30 May 2014 15:11:09 BST
 
 #include "models/additive_avg/backpropagator.h"
 
@@ -11,16 +11,20 @@
 namespace additive_avg {
 
 Backpropagator::Backpropagator(RecursiveAutoencoder* rae, const Model &model,
-                               int n)
+                               int n, Real* dictptr)
   : BackpropagatorBase(rae, model),
   grad_D(0, 0, 0), grad_Wl(0, 0), grad_Bl(0, 0) {
+
+    if (dictptr != nullptr) { assert (n == rae->getThetaSize()); }
 
     data = new Real[n];
     Real *ptr = data;
 
-    new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
-    grad_D.setZero();
-    ptr += rae->getThetaDSize();
+    if (dictptr == nullptr) {
+      new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
+      grad_D.setZero();
+      ptr += rae->getThetaDSize();
+    }
     new (&grad_Wl) WeightVectorType(ptr, rae->theta_Wl_size_);
     grad_Wl.setZero();
     ptr += rae->theta_Wl_size_;
@@ -30,11 +34,18 @@ Backpropagator::Backpropagator(RecursiveAutoencoder* rae, const Model &model,
 
     assert (data + n == ptr);
 
-    singleprop->passDataLink(data, n);
-    new (&dict_weights) WeightVectorType(data,rae->getThetaDSize());
-    new (&weights) WeightVectorType(data+rae->getThetaDSize(),rae->getThetaSize());
+    if (dictptr != nullptr) {
+      singleprop->passDictLink(dictptr, rae->getThetaDSize());
+      singleprop->passDataLink(data, rae->getThetaSize());
+      new (&dict_weights) WeightVectorType(dictptr, rae->getThetaDSize());
+      new (&weights) WeightVectorType(data, rae->getThetaSize());
+    } else {
+      singleprop->passDictLink(data, rae->getThetaDSize());
+      singleprop->passDataLink(data+rae->getThetaDSize(), rae->getThetaSize());
+      new (&dict_weights) WeightVectorType(data, rae->getThetaDSize());
+      new (&weights) WeightVectorType(data+rae->getThetaDSize(), rae->getThetaSize());
+    }
   }
-
 
 Backpropagator::~Backpropagator() {
   delete [] data;

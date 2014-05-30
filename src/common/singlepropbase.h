@@ -1,7 +1,7 @@
 // File: singlepropbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 03-01-2013
-// Last Update: Mon 28 Oct 2013 11:58:38 AM GMT
+// Last Update: Fri 30 May 2014 14:41:08 BST
 
 #ifndef COMMON_SINGLEPROPBASE_H
 #define COMMON_SINGLEPROPBASE_H
@@ -47,6 +47,7 @@ class SinglePropBase
   int getSentLength();
   int getNodesLength();
 
+  virtual void passDictLink(Real* data, int size) {};
   virtual void passDataLink(Real* data, int size) {};
 
  protected:

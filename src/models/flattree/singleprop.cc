@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Wed 14 May 2014 14:36:49 BST
+// Last Update: Fri 30 May 2014 14:46:55 BST
 
 #include <cmath>
 
@@ -61,20 +61,21 @@ void SingleProp::loadWithSentence(const Sentence &t) {
   SinglePropBase::loadWithSentence(t);
 }
 
+void SingleProp::passDictLink(Real* data, int size) {
+  int word_width = rae_->config.word_representation_size;
+  int dict_size  = rae_->getDictSize();
+  Real *ptr = data;
+  new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
+  assert (word_width * dict_size == size);
+}
+
 void SingleProp::passDataLink(Real* data, int size) {
-    int word_width = rae_->config.word_representation_size;
-    int dict_size  = rae_->getDictSize();
-    Real *ptr = data;
-    new (&grad_D) WeightMatrixType(ptr, dict_size, word_width);
-    // grad_D.setZero();
-    ptr += rae_->getThetaDSize();
-    new (&grad_Wl) WeightVectorType(ptr, rae_->theta_Wl_size_);
-    // grad_Wl.setZero();
-    ptr += rae_->theta_Wl_size_;
-    new (&grad_Bl) WeightVectorType(ptr, rae_->theta_Bl_size_);
-    // grad_Bl.setZero();
-    ptr += rae_->theta_Bl_size_;
-    assert (data + size == ptr);
+  Real *ptr = data;
+  new (&grad_Wl) WeightVectorType(ptr, rae_->theta_Wl_size_);
+  ptr += rae_->theta_Wl_size_;
+  new (&grad_Bl) WeightVectorType(ptr, rae_->theta_Bl_size_);
+  ptr += rae_->theta_Bl_size_;
+  assert (data + size == ptr);
 }
 
 /******************************************************************************

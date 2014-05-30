@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Mon 12 May 2014 17:35:07 BST
+// Last Update: Fri 30 May 2014 15:21:59 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -182,9 +182,12 @@ struct BProps
   BackpropagatorBase* propA;
   BackpropagatorBase* propB;
   BProps* docprop;
-  BProps(Model& a);
-  BProps(Model& a, Model& b);
-  BProps(Model& a, Model& b, Model& c, Model& d);
+  BProps(const Model& a);
+  BProps(const Model& a, const Model& b);
+  BProps(const Model& a, const Model& b, const Model& c, const Model& d);
+
+  BProps(const Model& a, bool share_dict);
+  BProps(const Model& a, const Model& b, Real* dictptr);
 };
 
 struct ENotImplemented : public exception

@@ -1,10 +1,11 @@
 // File: shared_defs.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-05-2013
-// Last Update: Wed 14 May 2014 11:17:38 BST
+// Last Update: Fri 30 May 2014 15:30:55 BST
 
 #include "shared_defs.h"
 #include "recursive_autoencoder.h"
+#include "backpropagatorbase.h"
 
 Model::Model() :
   rae(nullptr), alpha(0.2), beta(0.5), gamma(0.1), normalization_type(0),
@@ -42,7 +43,7 @@ Model::Model(RecursiveAutoencoderBase* rae_, TrainingCorpus corp) :
     }
   }
 
-BProps::BProps(Model& a) {
+BProps::BProps(const Model& a) {
   propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
   if (a.b != nullptr) {
     propB = (*a.b).rae->getBackpropagator(*a.b,a.b->rae->getThetaPlusDictSize());
@@ -53,13 +54,44 @@ BProps::BProps(Model& a) {
     }
   }
 }
-BProps::BProps(Model& a, Model& b) {
+
+BProps::BProps(const Model& a, const Model& b) {
   propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
   propB = b.rae->getBackpropagator(b,b.rae->getThetaPlusDictSize());
   docprop = nullptr;
 }
-BProps::BProps(Model& a, Model& b, Model& c, Model& d) {
+
+BProps::BProps(const Model& a, const Model& b, const Model& c, const Model& d) {
   propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
   propB = b.rae->getBackpropagator(b,b.rae->getThetaPlusDictSize());
   docprop = new BProps(c,d);
+}
+
+BProps::BProps(const Model& a, bool share_dict) {
+  if (share_dict == false) {
+    propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
+    if (a.b != nullptr) {
+      propB = (*a.b).rae->getBackpropagator(*a.b,a.b->rae->getThetaPlusDictSize());
+      if (a.docmod != nullptr) {
+        docprop = new BProps(*a.docmod, *(a.b->docmod));
+      } else {
+        docprop = nullptr;
+      }
+    }
+  } else {
+    propA = a.rae->getBackpropagator(a,a.rae->getThetaPlusDictSize());
+    Real* dictptr = propA->getDataLink();
+    propB = (*a.b).rae->getBackpropagator(*a.b,a.b->rae->getThetaSize(),dictptr);
+    if (a.docmod != nullptr) {
+      docprop = new BProps(*a.docmod, *(a.b->docmod), dictptr);
+    } else {
+      docprop = nullptr;
+    }
+  }
+}
+
+BProps::BProps(const Model& a, const Model& b, Real* dictptr) {
+  propA = a.rae->getBackpropagator(a,a.rae->getThetaSize(), dictptr);
+  propB = b.rae->getBackpropagator(b,b.rae->getThetaSize(), dictptr);
+  docprop = nullptr;
 }

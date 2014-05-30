@@ -1,7 +1,7 @@
 // File: bordestrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 29 May 2014 15:09:35 BST
+// Last Update: Fri 30 May 2014 15:32:51 BST
 
 // STL
 #include <iostream>
@@ -500,7 +500,7 @@ int main(int argc, char **argv)
   {
     cout << "Training with AdaGrad" << endl;
     //Model tmodel(modelA.rae,testCorpus);
-    train_adagrad(modelA,iterations,eta,nullptr,batches,lambdas,l1);
+    train_adagrad(modelA,iterations,eta,nullptr,batches,lambdas,l1,true);
   }
   if (config.training_method == 4)
   {
