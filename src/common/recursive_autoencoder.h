@@ -75,6 +75,7 @@ class RecursiveAutoencoderBase {
   friend class Trainer;
   friend class OpenQATrainer;
   friend class OpenQABordesTrainer;
+  friend class OpenQAFastBordesTrainer;
   friend class GeneralTrainer;
   friend int main(int argc, char **argv);
   friend void dumpModel(Model& model, int k);

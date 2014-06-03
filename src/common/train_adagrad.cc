@@ -52,6 +52,9 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
   int size = int(model.corpus.size());
   int num_batches = min(batches,size/2);
   int batchsize = max((size/num_batches),2);
+  int doc_size = int(model.docmod->corpus.size());
+  int doc_num_batches = min(batches,doc_size/2);
+  int doc_batchsize = max((doc_size/doc_num_batches),2);
   cout << "Batch size: " << batchsize << "  eta " << eta << endl;
 
   std::random_device rd;
@@ -79,6 +82,14 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
           model.to = min((batch+1)*batchsize,size);
           model.lambdas = lambdas;
           model.lambdas.multiply((model.to - model.from) / size);
+          // This will need fixing for other docmods!
+          if (model.docmod != nullptr) {
+            model.docmod->noise_sample_offset = rand(rd);
+            model.docmod->from = batch*doc_batchsize;
+            model.docmod->to = min((batch+1)*doc_batchsize,doc_size);
+            model.docmod->lambdas = lambdas;
+            model.docmod->lambdas.multiply((model.docmod->to - model.docmod->from) / doc_size);
+          }
           error = 0.0;
         }
         l1_batch = l1 * (model.to - model.from) / size;

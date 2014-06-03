@@ -3,7 +3,7 @@
 // Created: 16-01-2013
 // Last Update: Fri 30 May 2014 12:49:37 BST
 
-#include "openqa_bordes_trainer.h"
+#include "openqa_fast_bordes_trainer.h"
 
 #include <iostream>
 #include <random>
@@ -11,7 +11,7 @@
 #include "shared_defs.h"
 #include "models.h"
 
-void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
+void OpenQAFastBordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
                         int n, int iteration, BProps& props, Real* error)
 {
   assert(props.propB != nullptr);
@@ -26,7 +26,7 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
 
   if (iteration % 2 == 0) {
     // Question - Query
-    computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, true);
+    computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, false);
   }
   else {
     // Question - Question Paraphrases
@@ -39,7 +39,7 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
   }
 }
 
-void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
+void OpenQAFastBordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
                           Real *gradient_location, int n, int iteration,
                           BProps &prop, Real* error, bool near_noise) {
 
@@ -224,7 +224,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
   }
 }
 
-void OpenQABordesTrainer::testModel(Model &model) {
+void OpenQAFastBordesTrainer::testModel(Model &model) {
 
   /***************************************************************************
    *             Define a couple of frequently needed variables              *
@@ -254,7 +254,7 @@ void OpenQABordesTrainer::testModel(Model &model) {
   }
 }
 
-void OpenQABordesTrainer::setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
+void OpenQAFastBordesTrainer::setVarsAndNumber(Real *&vars, int &number_vars, Model &model) {
   number_vars += model.rae->getThetaSize();
   number_vars += model.b->rae->getThetaSize();
   number_vars += model.docmod->rae->getThetaSize();

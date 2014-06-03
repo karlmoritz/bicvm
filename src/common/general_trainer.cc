@@ -339,6 +339,8 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
   // If we're at the final loop (in case of minibatch updates) we now calculate
   // the gradients for the document level model.
   if (modelA.to == modelA.corpus.size() && modelA.docmod != nullptr) {
+    // MODIFY THIS TO SET modelA.docmod.to and .from
+    // TODO TODO TODO
     int docmodsize = modelA.docmod->rae->getThetaSize()
       + modelB.docmod->rae->getThetaSize()
       + modelA.docmod->rae->de_->getThetaSize()

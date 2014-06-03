@@ -61,6 +61,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 set(LBFGS_FLOAT "32")
 
+# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -pg")
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -pg")
+# SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -pg")
+# SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -pg")
+
 #############################################
 # Compiler Settings
 #############################################
@@ -78,7 +83,7 @@ add_library(pugi SHARED pugi/pugixml.cpp)
 
 set(EXECUTABLES dbltrain doctrain extract-vectors extract-comp-vectors
   ted-to-libsvm qqtrain qq-extract-relent qq-extract-text qq-rerank-eval
-  bordestrain)
+  bordestrain fastbtrain)
 foreach(f ${EXECUTABLES})
   add_executable(${f} ${f}.cc)
   target_link_libraries(${f} basics loaders trainers basemod dualtrain pugi)

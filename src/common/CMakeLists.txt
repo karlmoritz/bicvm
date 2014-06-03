@@ -16,7 +16,7 @@ add_library(trainers SHARED finite_grad_check.cc train_adagrad.cc train_sgd.cc
   train_lbfgs.cc)
 
 add_library(dualtrain SHARED general_trainer.cc openqa_trainer.cc
-  openqa_bordes_trainer.cc)
+  openqa_bordes_trainer.cc openqa_fast_bordes_trainer.cc)
 target_link_libraries(dualtrain basemod)
 
 # backpropagatorbase.cc   finite_grad_check.cc  load_doc.cc       recursive_autoencoder.cc  shared_defs.cc     train_lbfgs.cc   train_vsgd.cc
