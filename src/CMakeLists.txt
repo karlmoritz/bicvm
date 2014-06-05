@@ -32,6 +32,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 # set(link_libraries(train_cnlm ${Boost_LIBRARIES} cnlm)
 
 # Eigen
+set(EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}")
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
