@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Fri 30 May 2014 15:07:34 BST
+// Last Update: Thu 05 Jun 2014 09:22:30 BST
 
 #ifndef COMMON_RECURSIVE_AUTOENCODER_H
 #define COMMON_RECURSIVE_AUTOENCODER_H
@@ -51,6 +51,8 @@ class RecursiveAutoencoderBase {
   int getThetaSize()  { return theta_size_;   };
   int getThetaDSize() { return de_->getThetaSize(); };
   int getThetaPlusDictSize() { return theta_size_ + de_->getThetaSize(); };
+
+  void enforceNorm() { de_->enforceNorm(); }
 
   virtual void setIncrementalCounts(Counts *counts, Real *&vars,
                                     int &number) = 0;

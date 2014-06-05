@@ -1,7 +1,7 @@
 // File: dictionary_embeddings.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 12-05-2014
-// Last Update: Wed 14 May 2014 14:01:33 BST
+// Last Update: Thu 05 Jun 2014 09:17:27 BST
 
 #include <iostream>
 #include <fstream>
@@ -92,6 +92,10 @@ void DictionaryEmbeddings::addLambdaGrad(Real* theta_data, Bools l, Lambdas
     WeightVectorType X = WeightVectorType(theta_data,theta_size_);
     X += (Theta * lambdas.D);
   }
+}
+
+void DictionaryEmbeddings::enforceNorm() {
+  D.rowwise().normalize();
 }
 
 /*

@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Fri 30 May 2014 15:32:24 BST
+// Last Update: Thu 05 Jun 2014 09:25:02 BST
 
 // STL
 #include <iostream>
@@ -132,6 +132,12 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
 #pragma omp single
       {
         cout << "Error\t" << error << endl;
+        if (lambdas.D == -1) {
+          // Normalize dictionary.
+          cout << "Normalizing ...";
+          model.rae->enforceNorm();
+          cout << "done." << endl;
+        }
       }
       if ((iteration+1) % model.rae->config.dump_freq == 0) {
 #pragma omp single

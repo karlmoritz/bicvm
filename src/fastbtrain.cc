@@ -1,7 +1,7 @@
-// File: bordestrain.cc
+// File: fastbtrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Fri 30 May 2014 15:32:51 BST
+// Last Update: Thu 05 Jun 2014 09:23:04 BST
 
 // STL
 #include <iostream>
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
   Real epsilon   = vm["epsilon"].as<Real>();
 
   Lambdas lambdas;
-  lambdas.D   = vm["lambdaD"].as<Real>();
+  lambdas.D   = -1; //vm["lambdaD"].as<Real>(); // -1 for enforcing the norm.
   lambdas.Wd  = vm["lambdaWd"].as<Real>();
   lambdas.Wdr = vm["lambdaWd"].as<Real>();
   lambdas.Bd  = vm["lambdaBd"].as<Real>();

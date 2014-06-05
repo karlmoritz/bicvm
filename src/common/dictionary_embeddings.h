@@ -1,7 +1,7 @@
 // File: dictionary_embeddings.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Wed 28 May 2014 19:20:34 BST
+// Last Update: Thu 05 Jun 2014 09:13:16 BST
 
 #ifndef COMMON_DICTIONARY_EMBEDDINGS_H
 #define COMMON_DICTIONARY_EMBEDDINGS_H
@@ -31,6 +31,8 @@ class DictionaryEmbeddings {
 
   Real getLambdaCost(Bools bl, Lambdas lambdas);
   void addLambdaGrad(Real* theta_data, Bools bl, Lambdas lambdas);
+
+  void enforceNorm();
 
   /*
    * Inline functions.

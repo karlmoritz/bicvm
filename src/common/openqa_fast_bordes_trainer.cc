@@ -1,7 +1,7 @@
-// File: openqa_bordes_trainer.cc
+// File: openqa_fast_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Fri 30 May 2014 12:49:37 BST
+// Last Update: Thu 05 Jun 2014 09:23:12 BST
 
 #include "openqa_fast_bordes_trainer.h"
 
@@ -24,11 +24,12 @@ void OpenQAFastBordesTrainer::computeCostAndGrad( Model& model, const Real* x, R
 
   WeightVectorType zeroMe(gradient_location,n); zeroMe.setZero(); // set gradients to zero.
 
-  if (iteration % 2 == 0) {
-    // Question - Query
-    computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, false);
-  }
-  else {
+  /*
+   * if (iteration % 2 == 0) {
+   *   // Question - Query
+   * }
+   * else {
+   */
     // Question - Question Paraphrases
     int modsize_A = model.rae->getThetaSize();
     int modsize_B = model.b->rae->getThetaSize();
@@ -36,7 +37,10 @@ void OpenQAFastBordesTrainer::computeCostAndGrad( Model& model, const Real* x, R
     ptr += modsize_A + modsize_B;
     int m = n - modsize_A - modsize_B;
     computeBiCostAndGrad(*model.docmod, *(model.b->docmod), ptr, m, iteration, *props.docprop, error, false);
-  }
+  /*
+   * }
+   */
+    computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, true);
 }
 
 void OpenQAFastBordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
