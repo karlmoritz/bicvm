@@ -26,7 +26,7 @@ with open(labelfile,'r') as f:
 
 with open(scorefile) as f:
   for score in f:
-    scores.append(score)
+    scores.append(float(score.strip()))
 
 # print(unique_sentences)
 
