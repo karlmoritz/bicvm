@@ -1,7 +1,7 @@
 // File: utils.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Wed 21 May 2014 19:42:25 BST
+// Last Update: Mon 15 Sep 2014 13:30:15 BST
 
 #ifndef COMMON_UTILS_H
 #define COMMON_UTILS_H
@@ -20,7 +20,7 @@
 namespace bpo = boost::program_options;
 
 void dumpModel(Model& model, int k);
-void printSentence(const Dictionary& dict, const Sentence &sent);
+void printSentence(const Dictionary& dict, const Corpus &c, int sent);
 void paraphraseTest(Model& model, int k);
 void printConfig(const bpo::variables_map& vm);
 

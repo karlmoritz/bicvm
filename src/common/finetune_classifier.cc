@@ -1,7 +1,7 @@
 // File: finetune_classifier.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 29-01-2013
-// Last Update: Mon 12 May 2014 16:21:15 BST
+// Last Update: Tue 16 Sep 2014 17:53:26 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -87,7 +87,7 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
     size_t j = i;
     if ((not use_full_corpus) and (i % 2 == 1))
       j = trainC.size() - i;
-    trainData.push_back(VectorLabelPair(WeightVectorType(ptr, dynamic_embedding_size),trainC[j].value));
+    trainData.push_back(VectorLabelPair(WeightVectorType(ptr, dynamic_embedding_size),trainC.value[j]));
     mix.push_back(i);
     ptr += dynamic_embedding_size;
   }
@@ -96,7 +96,7 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
     size_t j = i;
     if ((not use_full_corpus) and (i%2 == 1))
       j = testC.size() - i;
-    testData.push_back(VectorLabelPair(WeightVectorType(ptr, dynamic_embedding_size),testC[j].value));
+    testData.push_back(VectorLabelPair(WeightVectorType(ptr, dynamic_embedding_size),testC.value[j]));
     ptr += dynamic_embedding_size;
   }
 
@@ -126,10 +126,8 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
     // TODO(kmh): This could be much more efficient with a single singleprop
     // shared across the corpus.
     Bools bools;
-    SinglePropBase* propagator = rae.getSingleProp(trainC[j].words.size(),
-                                                     trainC[j].nodes.size(),
-                                                     0.5, bools);
-    propagator->loadWithSentence(trainC[j]);
+    SinglePropBase* propagator = rae.getSingleProp(trainC, j, 0.5, bools);
+    propagator->loadWithSentence(trainC, j);
 
     propagator->forwardPropagate(false);
     propagator->setDynamic(trainData[i].vector,mode);
@@ -146,10 +144,8 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
       j = testC.size() - i;
 
     Bools bools;
-    SinglePropBase* propagator = rae.getSingleProp(testC[j].words.size(),
-                                                     testC[j].nodes.size(),
-                                                     0.5, bools);
-    propagator->loadWithSentence(testC[j]);
+    SinglePropBase* propagator = rae.getSingleProp(testC, j, 0.5, bools);
+    propagator->loadWithSentence(testC, j);
 
     propagator->forwardPropagate(false);
     propagator->setDynamic(testData[i].vector,mode);

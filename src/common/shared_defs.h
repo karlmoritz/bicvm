@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Fri 30 May 2014 15:21:59 BST
+// Last Update: Mon 15 Sep 2014 14:15:05 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -72,6 +72,9 @@ boost::assign::map_list_of
 
 #include "dictionary.h"
 
+/*
+ * Obsolete: Replace with some struct inheriting from TrainingCorpus
+ */
 struct Sentence
 {
   int             value;
@@ -92,7 +95,36 @@ class RecursiveAutoencoderBase;
 class BackpropagatorBase;
 class Trainer;
 
-typedef vector<Sentence> TrainingCorpus;
+// typedef vector<Sentence> TrainingCorpus;
+
+/*
+ * Minimal corpus structure.
+ */
+struct TrainingCorpus
+{
+  vector<vector<LabelID>> words;
+  vector<int> value;
+
+  vector<vector<int>> child0;
+  vector<vector<int>> child1;
+  vector<vector<int>> nodes;
+  vector<vector<int>> cat;
+  vector<vector<int>> tree_size;
+  vector<vector<CCGRuleType>> rule;
+  vector<int> id;
+  vector<int> doc_id;
+
+  int size() { return words.size(); }
+  vector<LabelID> operator [](int i) const {return words[i];}
+  vector<LabelID> & operator [](int i) {return words[i];}
+  void push_back(Sentence s) {
+    words.push_back(s.words);
+    id.push_back(s.id);
+    // TODO: Fill various vectors with sentence info.
+  }
+};
+
+typedef TrainingCorpus Corpus;
 
 template <typename T>
 struct modvars

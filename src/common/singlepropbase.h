@@ -1,7 +1,7 @@
 // File: singlepropbase.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 03-01-2013
-// Last Update: Fri 30 May 2014 14:41:08 BST
+// Last Update: Mon 15 Sep 2014 14:33:51 BST
 
 #ifndef COMMON_SINGLEPROPBASE_H
 #define COMMON_SINGLEPROPBASE_H
@@ -20,7 +20,7 @@ class SinglePropBase
   SinglePropBase(Bools updates, Real beta,
                  bool param_on_tree, bool has_unfolding);
   virtual ~SinglePropBase();
-  virtual void loadWithSentence(const Sentence& t);
+  virtual void loadWithSentence(const Corpus& c, int i);
 
 
   // Common propagation functions.
@@ -74,7 +74,12 @@ class SinglePropBase
   int sent_length;
   int nodes_length;
   int word_width;
-  const Sentence * instance_;
+  // const Sentence * instance_; // instead, link directly to more complex forms
+  // const vector<LabelID> * words_;
+  const Corpus * corpus_; // CORPUS link
+  int id;                 // sentence in corpus
+  // int value_;
+  // when needed!
   Bools updates;
   Real beta_;
 

@@ -1,7 +1,7 @@
 // File: backpropagatorbase.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 18-06-2013
-// Last Update: Fri 30 May 2014 13:28:51 BST
+// Last Update: Mon 15 Sep 2014 13:42:29 BST
 
 #include <random>
 
@@ -28,7 +28,7 @@ BackpropagatorBase::~BackpropagatorBase () {
 }
 
 SinglePropBase* BackpropagatorBase::forwardPropagate(int i, VectorReal* x) {
-  singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->loadWithSentence(model.corpus, i);
   singleprop->forwardPropagate(false);
   singleprop->setToD(x,0);
   return singleprop;
@@ -37,16 +37,18 @@ SinglePropBase* BackpropagatorBase::forwardPropagate(int i, VectorReal* x) {
 SinglePropBase* BackpropagatorBase::noisyForwardPropagate(int noise, int truth, VectorReal* x) {
   // DANGER: does not check whether noise and truth have the same lengh. This is
   // assumed.
-  corrupt = model.corpus[noise];
-  assert (model.corpus[noise].words.size() == model.corpus[truth].words.size());
+  Corpus corrupt;
+  corrupt.words.push_back(model.corpus[noise]);
+  // corrupt = model.corpus[noise];
+  assert (model.corpus[noise].size() == model.corpus[truth].size());
   // std::random_device rd;
   // std::mt19937 gen(rd());
-  for (int i = 0; i < corrupt.words.size(); ++i) {
+  for (int i = 0; i < corrupt[0].size(); ++i) {
     if (rnd_gen() == 3) {
-      corrupt.words[i] = model.corpus[truth].words[i];
+      corrupt[0][i] = model.corpus[truth][i];
     }
   }
-  singleprop->loadWithSentence(corrupt);
+  singleprop->loadWithSentence(corrupt, 0);
   singleprop->forwardPropagate(false);
   singleprop->setToD(x,0);
   return singleprop;
@@ -61,7 +63,7 @@ void BackpropagatorBase::backPropagateUnf(int i, VectorReal* x) {
 
 void BackpropagatorBase::backPropagateAEWrapper(int i, bool unfold,
                                                 VectorReal* x) {
-  singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->loadWithSentence(model.corpus, i);
   singleprop->forwardPropagate(true);
   singleprop->setToD(x,0);
   if (unfold)
@@ -76,12 +78,12 @@ void BackpropagatorBase::backPropagateAEWrapper(int i, bool unfold,
 }
 
 int BackpropagatorBase::backPropagateLbl(int i, VectorReal* x) {
-  singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->loadWithSentence(model.corpus, i);
   singleprop->forwardPropagate(false);
   singleprop->setToD(x,0);
   int correct = singleprop->backPropagate(true, false, false, false);
 
-    if(model.corpus[i].value==0) {
+    if(model.corpus.value[i]==0) { // Assuming corpus has a label (value)
       is_a_zero += singleprop->getJointNodes();
       zero_should_be_zero += singleprop->getClassCorrect();
       one_should_be_zero += (singleprop->getJointNodes() - singleprop->getClassCorrect());
@@ -100,7 +102,7 @@ int BackpropagatorBase::backPropagateLbl(int i, VectorReal* x) {
 
 void BackpropagatorBase::backPropagateBi(int i, VectorReal* x,
                                          VectorReal word) {
-  singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->loadWithSentence(model.corpus, i);
   singleprop->forwardPropagate(false);
   singleprop->setToD(x,0);
   singleprop->backPropagate(false, false, true, false, &word);
@@ -113,7 +115,7 @@ void BackpropagatorBase::backPropagateBi(int i, VectorReal* x,
 
 void BackpropagatorBase::unfoldPropagateGiven(int i, SinglePropBase* otherModel,
                                               VectorReal* gradient) {
-  singleprop->loadWithSentence(model.corpus[i]);
+  singleprop->loadWithSentence(model.corpus, i);
   singleprop->D[0] = otherModel->D[0];
   singleprop->unfoldFromHere(0); // unfold from root node
   // Manually copy over word vectors due to the direct unfolding call.

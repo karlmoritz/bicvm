@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Fri 30 May 2014 14:46:55 BST
+// Last Update: Mon 15 Sep 2014 14:36:46 BST
 
 #include <cmath>
 
@@ -56,9 +56,9 @@ SingleProp::SingleProp(RecursiveAutoencoderBase* rae,
  * Reset the temporary variables - in our case here just the single value for
  * the additive bag of words parent node.
  */
-void SingleProp::loadWithSentence(const Sentence &t) {
+void SingleProp::loadWithSentence(const Corpus &t, int i) {
   memset(m_data, 0, sizeof(Real) * m_data_size);
-  SinglePropBase::loadWithSentence(t);
+  SinglePropBase::loadWithSentence(t, i);
 }
 
 void SingleProp::passDictLink(Real* data, int size) {
@@ -83,13 +83,13 @@ void SingleProp::passDataLink(Real* data, int size) {
  ******************************************************************************/
 void SingleProp::forwardPropagate(bool autoencode) {
   if (sent_length == 1) {
-    D[0] = rae_->de_->getD().row(instance_->words[0]).unaryExpr(std::ptr_fun(getTanh));
+    D[0] = rae_->de_->getD().row(corpus_->words[id][0]).unaryExpr(std::ptr_fun(getTanh));
     return;
   }
   for (int i = 1; i < sent_length; ++i) {
     D[i] =
-      (rae_->de_->getD().row(instance_->words[i-1])
-       + rae_->de_->getD().row(instance_->words[i]))
+      (rae_->de_->getD().row(corpus_->words[id][i-1])
+       + rae_->de_->getD().row(corpus_->words[id][i]))
       .unaryExpr(std::ptr_fun(getTanh));
     D[0] += D[i];
   }
@@ -112,14 +112,14 @@ int SingleProp::backPropagate(bool lbl_error,
  *w w   w   w   w  # words
  */
   if (sent_length == 1) {
-    grad_D.row(instance_->words[0]) += (Delta_D[0].array() * (1 - D[0].array().pow(2))).matrix();
+    grad_D.row(corpus_->words[id][0]) += (Delta_D[0].array() * (1 - D[0].array().pow(2))).matrix();
     return 0;
   }
   // Use Delta_D[0] as storage for all deltas.
   // Delta_D[0] = (Delta_D[0].array() * (1 - D[0].array().pow(2))).matrix();
   for (int i = 1; i < sent_length; ++i) {
-    grad_D.row(instance_->words[i])     += (Delta_D[0].array() * (1 - D[i].array().pow(2))).matrix();
-    grad_D.row(instance_->words[i - 1]) += (Delta_D[0].array() * (1 - D[i].array().pow(2))).matrix();
+    grad_D.row(corpus_->words[id][i])     += (Delta_D[0].array() * (1 - D[i].array().pow(2))).matrix();
+    grad_D.row(corpus_->words[id][i - 1]) += (Delta_D[0].array() * (1 - D[i].array().pow(2))).matrix();
   }
   return 0;
 }
@@ -143,14 +143,14 @@ int SingleProp::applyLabel(int node, bool use_lbl_error, Real beta) {
 
   ArrayReal label_correct(rae_->config.label_class_size);
   assert(rae_->config.label_class_size == 1);
-  label_correct[0] = instance_->value;
+  label_correct[0] = corpus_->value[id];
 
   // dE/dv * sigmoid'(net)
   ArrayReal label_delta = - beta * (label_correct - label_pred) * (1-label_pred) * (label_pred);
   Real lbl_error = 0.5 * beta * ((label_pred - label_correct) * (label_pred - label_correct)).sum();
 
   int correct = 0;
-  if( abs(instance_->value - label_pred[0]) < 0.5 ) {
+  if( abs(corpus_->value[id] - label_pred[0]) < 0.5 ) {
     correct = 1;
     classified_correctly_ += 1;
   } else {
