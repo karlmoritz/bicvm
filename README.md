@@ -22,7 +22,7 @@ This is development code and not fully functional. Currently, dbltrain should
 behave as expected; the other executables won't compile and still need to be
 ported to the refactored codebase.
 
-Dictionary/Model initialisation could be cleaned up.
+Dictionary/Model initialisation could be cleaned up!
 
 More ToDo: There is some technical debt from the memory optimisation on the
 corpus side. Principally this concerns the push_back overload for the corpus
