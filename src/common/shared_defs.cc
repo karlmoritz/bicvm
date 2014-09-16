@@ -1,7 +1,7 @@
 // File: shared_defs.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 09-05-2013
-// Last Update: Fri 30 May 2014 15:30:55 BST
+// Last Update: Mon 15 Sep 2014 14:22:49 BST
 
 #include "shared_defs.h"
 #include "recursive_autoencoder.h"
@@ -19,10 +19,12 @@ void Model::finalize() {
   indexes.reserve(corpus.size());
   for (int i = 0; i < int(corpus.size()); ++i) {
     indexes.push_back(i);
-    if (corpus[i].words.size() > max_sent_length)
-      max_sent_length = corpus[i].words.size();
-    if (corpus[i].nodes.size() > max_node_length)
-      max_node_length = corpus[i].nodes.size();
+    if (corpus.words[i].size() > max_sent_length)
+      max_sent_length = corpus.words[i].size();
+  }
+  for (int i = 0; i < int(corpus.nodes.size()); ++i) {
+    if (corpus.nodes[i].size() > max_node_length)
+      max_node_length = corpus.nodes[i].size();
   }
 }
 
@@ -36,10 +38,10 @@ Model::Model(RecursiveAutoencoderBase* rae_, TrainingCorpus corp) :
     indexes.reserve(corp.size());
     for (int i = 0; i < int(corp.size()); ++i) {
       indexes.push_back(i);
-      if (corp[i].words.size() > max_sent_length)
-        max_sent_length = corp[i].words.size();
-      if (corp[i].nodes.size() > max_node_length)
-        max_node_length = corp[i].nodes.size();
+      if (corp.words[i].size() > max_sent_length)
+        max_sent_length = corp.words[i].size();
+      if (corp.nodes[i].size() > max_node_length)
+        max_node_length = corp.nodes[i].size();
     }
   }
 

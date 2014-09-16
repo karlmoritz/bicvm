@@ -1,7 +1,7 @@
 // File: singleprop.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 13-01-2013
-// Last Update: Fri 30 May 2014 14:46:57 BST
+// Last Update: Mon 15 Sep 2014 14:36:46 BST
 
 #include <cmath>
 
@@ -49,8 +49,8 @@ SingleProp::SingleProp(RecursiveAutoencoderBase* rae,
  * Reset the temporary variables - in our case here just the single value for
  * the additive bag of words parent node.
  */
-void SingleProp::loadWithSentence(const Sentence &t) {
-  SinglePropBase::loadWithSentence(t);
+void SingleProp::loadWithSentence(const Corpus &t, int i) {
+  SinglePropBase::loadWithSentence(t, i);
   D[0].setZero();
   Delta_D[0].setZero();
 }
@@ -77,7 +77,7 @@ void SingleProp::passDataLink(Real* data, int size) {
  ******************************************************************************/
 void SingleProp::forwardPropagate(bool autoencode) {
   for (int i = 0; i < sent_length; ++i) {
-    D[0] += rae_->de_->getD().row(instance_->words[i]);
+    D[0] += rae_->de_->getD().row(corpus_->words[id][i]);
   }
 }
 
@@ -92,7 +92,7 @@ int SingleProp::backPropagate(bool lbl_error,
 
   if (updates.D) {
     for (int i = 0; i < sent_length; ++i) {
-      grad_D.row(instance_->words[i]) += Delta_D[0];
+      grad_D.row(corpus_->words[id][i]) += Delta_D[0];
     }
   }
   return 0;
@@ -117,14 +117,14 @@ int SingleProp::applyLabel(int node, bool use_lbl_error, Real beta) {
 
   ArrayReal label_correct(rae_->config.label_class_size);
   assert(rae_->config.label_class_size == 1);
-  label_correct[0] = instance_->value;
+  label_correct[0] = corpus_->value[id];
 
   // dE/dv * sigmoid'(net)
   ArrayReal label_delta = - beta * (label_correct - label_pred) * (1-label_pred) * (label_pred);
   Real lbl_error = 0.5 * beta * ((label_pred - label_correct) * (label_pred - label_correct)).sum();
 
   int correct = 0;
-  if( abs(instance_->value - label_pred[0]) < 0.5 ) {
+  if( abs(corpus_->value[id] - label_pred[0]) < 0.5 ) {
     correct = 1;
     classified_correctly_ += 1;
   } else {

@@ -1,7 +1,7 @@
 // File: utils.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Wed 21 May 2014 19:46:48 BST
+// Last Update: Mon 15 Sep 2014 14:11:32 BST
 
 #include "utils.h"
 
@@ -44,9 +44,9 @@ void dumpModel(Model& model, int k)
   }
 }
 
-void printSentence(const Dictionary& dict, const Sentence &sent) {
-  for (size_t i = 0; i < sent.words.size() ; ++i) {
-    cout << dict.label(sent.words[i]) << " ";
+void printSentence(const Dictionary& dict, const Corpus &c, int sent) {
+  for (size_t i = 0; i < c[sent].size() ; ++i) {
+    cout << dict.label(c[sent][i]) << " ";
   }
   cout << endl;
 }
@@ -84,10 +84,10 @@ void paraphraseTest(Model& modelA, int k)
 // #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<length; ++i)
   {
-    SinglePropBase* propagator = modelA.rae->getSingleProp(modelA.corpus[i].words.size(),
-                                                         modelA.corpus[i].nodes.size(),
+    SinglePropBase* propagator = modelA.rae->getSingleProp(modelA.corpus.words[i].size(),
+                                                         modelA.corpus.nodes[i].size(),
                                                          0.5,modelA.bools);
-    propagator->loadWithSentence(modelA.corpus[i]);
+    propagator->loadWithSentence(modelA.corpus, i);
     propagator->forwardPropagate(false);
     propagator->setDynamic(vectorsA[i],dmode);
     delete propagator;
@@ -95,10 +95,10 @@ void paraphraseTest(Model& modelA, int k)
 // #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<length; ++i)
   {
-    SinglePropBase* propagator = modelB.rae->getSingleProp(modelB.corpus[i].words.size(),
-                                                         modelB.corpus[i].nodes.size(),
+    SinglePropBase* propagator = modelB.rae->getSingleProp(modelB.corpus.words[i].size(),
+                                                         modelB.corpus.nodes[i].size(),
                                                          0.5,modelB.bools);
-    propagator->loadWithSentence(modelB.corpus[i]);
+    propagator->loadWithSentence(modelB.corpus, i);
     propagator->forwardPropagate(false);
     propagator->setDynamic(vectorsB[i],dmode);
     delete propagator;

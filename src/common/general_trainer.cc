@@ -1,7 +1,7 @@
 // File: general_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Wed 14 May 2014 13:01:50 BST
+// Last Update: Mon 15 Sep 2014 14:16:27 BST
 
 #include "general_trainer.h"
 
@@ -157,7 +157,7 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
       if (modelB.docmod != nullptr) {
         // If docmod, pass the sentence vector into the docmod model now.
         // sent_id is unique, so parallel access should not be an issue.
-        int sent_id = modelB.corpus[j].id;
+        int sent_id = modelB.corpus.id[j];
         modelB.docmod->rae->de_->D.row(sent_id) = rootB;
       }
 
@@ -199,7 +199,7 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
         if (modelA.docmod != nullptr && iteration > 0) {
           // Add docmod gradient and error!
           prop.propA->backPropagateGiven(j, selff,
-                                         docgrad_AD.row(modelA.corpus[j].id).transpose() +
+                                         docgrad_AD.row(modelA.corpus.id[j]).transpose() +
                                          gamma*(combined_noise_root - noise_count*rootB));
         } else {
           prop.propA->backPropagateGiven(j, selff,
@@ -218,7 +218,7 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
       SinglePropBase* other = prop.propA->forwardPropagate(j,&rootA);
       if (modelA.docmod != nullptr) {
         // If docmod, pass the sentence vector into the docmod model now.
-        int sent_id = modelA.corpus[j].id;
+        int sent_id = modelA.corpus.id[j];
         modelA.docmod->rae->de_->D.row(sent_id) = rootA; // using sent_id directly to store correct row.
       }
 
@@ -258,7 +258,7 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
         if (modelB.docmod != nullptr && iteration > 0) {
           // Add docmod gradient and error!
           prop.propB->backPropagateGiven(j, selff,
-                                         docgrad_BD.row(modelB.corpus[j].id).transpose() +
+                                         docgrad_BD.row(modelB.corpus.id[j]).transpose() +
                                          gamma*(combined_noise_root - noise_count*rootA));
         } else {
           prop.propB->backPropagateGiven(j,selff,
@@ -367,10 +367,10 @@ void GeneralTrainer::testModel(Model &model) {
 #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<num_sentences; ++i) {
     int j = model.indexes[i];
-    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus[j].words.size(),
-        model.corpus[j].nodes.size(),
+    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus.words[j].size(),
+        model.corpus.nodes[j].size(),
         0.5,model.bools);
-    propagator->loadWithSentence(model.corpus[j]);
+    propagator->loadWithSentence(model.corpus, j);
     propagator->forwardPropagate(false);
 #pragma omp critical
     {

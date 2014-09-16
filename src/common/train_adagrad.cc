@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 05 Jun 2014 09:25:02 BST
+// Last Update: Mon 15 Sep 2014 15:38:21 BST
 
 // STL
 #include <iostream>
@@ -52,8 +52,10 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
   int size = int(model.corpus.size());
   int num_batches = min(batches,size/2);
   int batchsize = max((size/num_batches),2);
-  int doc_size = int(model.docmod->corpus.size());
-  int doc_num_batches = min(batches,doc_size/2);
+  int doc_size = 0;
+  if (model.docmod != nullptr)
+    doc_size = int(model.docmod->corpus.size());
+  int doc_num_batches = max(1,min(batches,doc_size/2));
   int doc_batchsize = max((doc_size/doc_num_batches),2);
   cout << "Batch size: " << batchsize << "  eta " << eta << endl;
 

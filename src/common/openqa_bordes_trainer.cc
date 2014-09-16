@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Fri 30 May 2014 12:49:37 BST
+// Last Update: Mon 15 Sep 2014 14:16:49 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -241,10 +241,10 @@ void OpenQABordesTrainer::testModel(Model &model) {
 #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<num_sentences; ++i) {
     int j = model.indexes[i];
-    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus[j].words.size(),
-                                                          model.corpus[j].nodes.size(),
+    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus.words[j].size(),
+                                                          model.corpus.nodes[j].size(),
                                                           0.5,model.bools);
-    propagator->loadWithSentence(model.corpus[j]);
+    propagator->loadWithSentence(model.corpus, j);
     propagator->forwardPropagate(false);
 #pragma omp critical
     {
