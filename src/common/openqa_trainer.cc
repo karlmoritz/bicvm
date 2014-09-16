@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Mon 15 Sep 2014 14:17:50 BST
+// Last Update: Tue 16 Sep 2014 17:51:05 BST
 
 #include "openqa_trainer.h"
 
@@ -290,9 +290,8 @@ void OpenQATrainer::testModel(Model &model) {
 #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<num_sentences; ++i) {
     int j = model.indexes[i];
-    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus.words[j].size(),
-        model.corpus.nodes[j].size(),
-        0.5,model.bools);
+    SinglePropBase* propagator = model.rae->getSingleProp(model.corpus, j,
+                                                          0.5, model.bools);
     propagator->loadWithSentence(model.corpus, j);
     propagator->forwardPropagate(false);
 #pragma omp critical

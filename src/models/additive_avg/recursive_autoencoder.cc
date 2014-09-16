@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Fri 30 May 2014 14:59:01 BST
+// Last Update: Tue 16 Sep 2014 17:59:50 BST
 
 #include "recursive_autoencoder.h"
 
@@ -30,6 +30,12 @@ BackpropagatorBase* RecursiveAutoencoder::getBackpropagator(const Model &model,
 {
   BackpropagatorBase* bpb = new Backpropagator(this, model, n, dictptr);
   return bpb;
+}
+
+SinglePropBase* RecursiveAutoencoder::getSingleProp(const Corpus& t, int i, Real beta, Bools updates)
+{
+  SinglePropBase* spb = new SingleProp(this, t.words[i].size(), 0, beta, updates);
+  return spb;
 }
 
 SinglePropBase* RecursiveAutoencoder::getSingleProp(int sl, int nl, Real beta, Bools updates)

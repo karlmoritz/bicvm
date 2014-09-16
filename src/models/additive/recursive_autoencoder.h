@@ -1,7 +1,7 @@
 // File: recursive_autoencoder.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 02-01-2013
-// Last Update: Fri 30 May 2014 14:59:56 BST
+// Last Update: Tue 16 Sep 2014 18:00:25 BST
 
 #ifndef MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
 #define MODELS_ADDITIVE_RECURSIVE_AUTOENCODER_H
@@ -27,6 +27,7 @@ class RecursiveAutoencoder : public RecursiveAutoencoderBase {
 
   BackpropagatorBase* getBackpropagator(const Model &model, int n,
                                         Real* dictptr=nullptr);
+  SinglePropBase*     getSingleProp(const Corpus& t, int i, Real beta, Bools updates);
   SinglePropBase*     getSingleProp(int sl, int nl, Real beta, Bools updates);
 
   friend class SingleProp;

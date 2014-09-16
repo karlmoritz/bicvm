@@ -1,7 +1,7 @@
 // File: utils.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 30-01-2013
-// Last Update: Mon 15 Sep 2014 14:11:32 BST
+// Last Update: Tue 16 Sep 2014 17:52:28 BST
 
 #include "utils.h"
 
@@ -84,8 +84,7 @@ void paraphraseTest(Model& modelA, int k)
 // #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<length; ++i)
   {
-    SinglePropBase* propagator = modelA.rae->getSingleProp(modelA.corpus.words[i].size(),
-                                                         modelA.corpus.nodes[i].size(),
+    SinglePropBase* propagator = modelA.rae->getSingleProp(modelA.corpus, i,
                                                          0.5,modelA.bools);
     propagator->loadWithSentence(modelA.corpus, i);
     propagator->forwardPropagate(false);
@@ -95,8 +94,7 @@ void paraphraseTest(Model& modelA, int k)
 // #pragma omp parallel for schedule(dynamic)
   for (auto i = 0; i<length; ++i)
   {
-    SinglePropBase* propagator = modelB.rae->getSingleProp(modelB.corpus.words[i].size(),
-                                                         modelB.corpus.nodes[i].size(),
+    SinglePropBase* propagator = modelB.rae->getSingleProp(modelB.corpus, i,
                                                          0.5,modelB.bools);
     propagator->loadWithSentence(modelB.corpus, i);
     propagator->forwardPropagate(false);

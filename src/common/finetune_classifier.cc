@@ -1,7 +1,7 @@
 // File: finetune_classifier.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 29-01-2013
-// Last Update: Mon 15 Sep 2014 14:03:14 BST
+// Last Update: Tue 16 Sep 2014 17:53:26 BST
 /*------------------------------------------------------------------------
  * Description: <DESC>
  *
@@ -126,9 +126,7 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
     // TODO(kmh): This could be much more efficient with a single singleprop
     // shared across the corpus.
     Bools bools;
-    SinglePropBase* propagator = rae.getSingleProp(trainC.words[j].size(),
-                                                     trainC.nodes[j].size(),
-                                                     0.5, bools);
+    SinglePropBase* propagator = rae.getSingleProp(trainC, j, 0.5, bools);
     propagator->loadWithSentence(trainC, j);
 
     propagator->forwardPropagate(false);
@@ -146,9 +144,7 @@ FinetuneClassifier::FinetuneClassifier(RecursiveAutoencoderBase& rae,
       j = testC.size() - i;
 
     Bools bools;
-    SinglePropBase* propagator = rae.getSingleProp(testC.words[j].size(),
-                                                     testC.nodes[j].size(),
-                                                     0.5, bools);
+    SinglePropBase* propagator = rae.getSingleProp(testC, j, 0.5, bools);
     propagator->loadWithSentence(testC, j);
 
     propagator->forwardPropagate(false);
