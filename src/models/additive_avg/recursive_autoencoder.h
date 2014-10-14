@@ -1,0 +1,53 @@
+// File: recursive_autoencoder.h
+// Author: Karl Moritz Hermann (mail@karlmoritz.com)
+// Created: 02-01-2013
+// Last Update: Tue 16 Sep 2014 18:00:25 BST
+
+#ifndef MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H
+#define MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H
+
+#include "../../common/recursive_autoencoder.h"
+
+#include "singleprop.h"
+#include "backpropagator.h"
+
+namespace additive_avg {
+
+class RecursiveAutoencoder : public RecursiveAutoencoderBase {
+ public:
+  RecursiveAutoencoder (const ModelData& config);
+
+  virtual ~RecursiveAutoencoder ();
+  RecursiveAutoencoderBase* cloneEmpty ();
+
+  Real getLambdaCost(Bools bl, Lambdas lambdas);
+  void addLambdaGrad(Real* theta_data, Bools bl, Lambdas lambdas);
+
+  void setIncrementalCounts(Counts *counts, Real *&vars, int &number);
+
+  BackpropagatorBase* getBackpropagator(const Model &model, int n,
+                                        Real* dictptr=nullptr);
+  SinglePropBase*     getSingleProp(const Corpus& t, int i, Real beta, Bools updates);
+  SinglePropBase*     getSingleProp(int sl, int nl, Real beta, Bools updates);
+
+  friend class SingleProp;
+  friend class Backpropagator;
+ private:
+  void init(bool init_words, bool create_new_theta);
+
+  WeightMatricesType    Wl;     // Label (nxl)
+  WeightVectorsType     Bl;     // Bias  (l)
+
+  Real*                 theta_Wl_;
+  Real*                 theta_Bl_;
+
+  int         theta_Wl_size_;
+  int         theta_Bl_size_;
+
+  WeightVectorType      Theta_Wl;
+  WeightVectorType      Theta_Bl;
+};
+
+}  // namespace additive_avg
+
+#endif  // MODELS_ADDITIVE_AVG_RECURSIVE_AUTOENCODER_H
