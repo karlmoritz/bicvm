@@ -1,7 +1,7 @@
 // File: qq-rerank-eval.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 28 May 2014 18:33:14 BST
+// Last Update: Tue 14 Oct 2014 15:08:59 BST
 
 // STL
 #include <iostream>
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   bpo::options_description generic("Allowed options");
   generic.add_options()
     ("type", bpo::value<string>()->default_value("additive"),
-     "type of model (ccaeb, mvrnn, ...)")
+     "type of model (additive, flattree, ...)")
     ("input", bpo::value<string>()->default_value(""),
      "input file in paralex vocabulary format")
     ("model", bpo::value<string>(), "input model")

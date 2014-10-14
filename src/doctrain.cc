@@ -1,7 +1,7 @@
 // File: doctrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 14 Oct 2014 15:01:42 BST
+// Last Update: Tue 14 Oct 2014 15:08:59 BST
 
 // STL
 #include <iostream>
@@ -78,8 +78,8 @@ int main(int argc, char **argv)
     ;
   bpo::options_description generic("Allowed options");
   generic.add_options()
-    ("type", bpo::value<string>()->default_value("ccaeb"),
-     "type of model (ccaeb, mvrnn)")
+    ("type", bpo::value<string>()->default_value("additive"),
+     "type of model (additive, flattree)")
 
     ("input1", bpo::value<string>()->default_value(""),
      "l1 corpus. sentence aligned to l2.")
