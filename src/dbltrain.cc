@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 14 Oct 2014 11:27:38 BST
+// Last Update: Tue 14 Oct 2014 15:01:46 BST
 
 // STL
 #include <iostream>
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
   std::locale::global(l);
 # endif
 
-  cout << "CCG-Based Deep Network: Copyright 2013 Karl Moritz Hermann" << endl;
+  cout << "BiCVM Distributed Representation Learner: Copyright 2013-2014 Karl Moritz Hermann" << endl;
 
   /***************************************************************************
    *                         Command line processing                         *
