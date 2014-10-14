@@ -1,7 +1,7 @@
 // File: dbltrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Thu 22 May 2014 11:59:56 BST
+// Last Update: Tue 14 Oct 2014 11:27:38 BST
 
 // STL
 #include <iostream>
@@ -208,9 +208,6 @@ int main(int argc, char **argv)
     ("dynamic-mode,d", bpo::value<int>()->default_value(0),
      "type of sentence representation: 0 (root+avg), 1 (root), 2 (avg), 3(concat-all), 4 (complicated)")
 
-    ("fast", bpo::value<bool>()->default_value(false),
-     "fast bi-training: only train model B, dependent on A")
-
     ("noise", bpo::value<int>()->default_value(2),
      "number of noise samples per positive training example")
     ("hinge_loss_margin", bpo::value<Real>()->default_value(1.0), "Hinge loss margin")
@@ -310,9 +307,6 @@ int main(int argc, char **argv)
   configB.calc_bi      = vm["calc_bi_error2"].as<bool>();
   configB.calc_through = vm["calc_thr_error2"].as<bool>();
   configB.calc_uae     = vm["calc_uae_error2"].as<bool>();
-
-  bool fast = vm["fast"].as<bool>();
-  bool throughprop = (configA.calc_through or configB.calc_through) ? true : false;
 
   bool fonly      = false; //vm["fonly"].as<bool>();
 
@@ -504,11 +498,6 @@ int main(int argc, char **argv)
    *            Setup model and update dictionary if create above            *
    ***************************************************************************/
 
-  // Reindexing should only have an effect IF we load an existing model and a
-  // new corpus.
-  // DictionaryEmbeddings newDeA = reindex_dict(deA,modelA.corpus);
-  // DictionaryEmbeddings newDeB = reindex_dict(deB,modelB.corpus);
-
   modelA.rae = &raeA;
   modelB.rae = &raeB;
   // Hacky: alphas directly into model.
@@ -523,14 +512,8 @@ int main(int argc, char **argv)
   delete deA;
   delete deB;
 
-  cout << "Addresses for A: " << &(modelA.rae->de_) << endl;
-  cout << "Addresses for B: " << &(modelB.rae->de_) << endl;
-  cout << "Sizes: " << modelA.rae->de_->getThetaSize() << endl;
-  cout << "Sizes: " << modelB.rae->de_->getThetaSize() << endl;
-  modelB.rae->de_->debugInfo();
-
+  // modelB.rae->de_->debugInfo();
   // TODO: Delete the old dictionary (deA,deB)
-
 
   int ab_size = modelA.rae->getThetaSize()
               + modelB.rae->getThetaSize()
@@ -587,7 +570,7 @@ int main(int argc, char **argv)
    *                              BFGS training                              *
    ***************************************************************************/
 
-  modelA.b = &modelB; // magic setting: throughprop A and B together // meh, na
+  modelA.b = &modelB;
 
   if (config.training_method == 0)
   {
@@ -602,7 +585,6 @@ int main(int argc, char **argv)
   else if (config.training_method == 2)
   {
     cout << "Finite Gradient Check" << endl;
-    // train_adagrad(modelA,3,eta,nullptr,batches,lambdas,l1);
     finite_bigrad_check(modelA,lambdas);
   }
   else if (config.training_method == 3)

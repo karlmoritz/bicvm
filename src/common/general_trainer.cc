@@ -1,7 +1,7 @@
 // File: general_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Tue 16 Sep 2014 17:51:51 BST
+// Last Update: Tue 14 Oct 2014 13:15:21 BST
 
 #include "general_trainer.h"
 
@@ -12,7 +12,7 @@
 #include "models.h"
 
 void GeneralTrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
-                        int n, int iteration, BProps& props, Real* error)
+                        int number_vars, int iteration, BProps& props, Real* error)
 {
   props.propA->reset();
   if (props.propB != nullptr) { props.propB->reset(); }
@@ -22,19 +22,19 @@ void GeneralTrainer::computeCostAndGrad( Model& model, const Real* x, Real* grad
    *                Check for bimodel setup - otherwise proceed                 *
    ******************************************************************************/
   if (model.b != nullptr) {
-    computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
+    computeBiCostAndGrad(model, *model.b, x, gradient_location, number_vars, iteration, props, error);
     return;
   }
 
-  WeightVectorType weights(gradient_location,n);
+  WeightVectorType weights(gradient_location,number_vars);
 #pragma omp single
   {
     weights.setZero();
   }
 
-  BackpropagatorBase* lblprop = (model.rae->config.calc_lbl) ? model.rae->getBackpropagator(model,n) : nullptr;
-  BackpropagatorBase* raeprop = (model.rae->config.calc_rae) ? model.rae->getBackpropagator(model,n) : nullptr;
-  BackpropagatorBase* uaeprop = (model.rae->config.calc_uae) ? model.rae->getBackpropagator(model,n) : nullptr;
+  BackpropagatorBase* lblprop = (model.rae->config.calc_lbl) ? model.rae->getBackpropagator(model,number_vars) : nullptr;
+  BackpropagatorBase* raeprop = (model.rae->config.calc_rae) ? model.rae->getBackpropagator(model,number_vars) : nullptr;
+  BackpropagatorBase* uaeprop = (model.rae->config.calc_uae) ? model.rae->getBackpropagator(model,number_vars) : nullptr;
 
   size_t thread_num = omp_get_thread_num();
   size_t num_threads = omp_get_num_threads();
@@ -88,7 +88,7 @@ void GeneralTrainer::computeCostAndGrad( Model& model, const Real* x, Real* grad
 }
 
 void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
-                          Real *gradient_location, int n, int iteration,
+                          Real *gradient_location, int number_vars, int iteration,
                           BProps &prop, Real* error) {
 
   int modsize_A = modelA.rae->getThetaSize();
@@ -102,7 +102,7 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
   WeightVectorType weightsB(ptr,modsize_B); ptr += modsize_B;
   WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
   WeightVectorType dweightsB(ptr,dictsize_B); ptr += dictsize_B;
-  assert (gradient_location + n == ptr);
+  assert (gradient_location + number_vars == ptr);
 
 #pragma omp single
   {
@@ -131,7 +131,6 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
     new (&docgrad_BD) WeightMatrixType(ptr, docBdict_size, word_width);
     ptr += dictsize_D;
   }
-  assert (gradient_location + n == ptr);
 
   Real gamma = modelA.gamma;
 
@@ -339,14 +338,16 @@ void GeneralTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Re
   // If we're at the final loop (in case of minibatch updates) we now calculate
   // the gradients for the document level model.
   if (modelA.to == modelA.corpus.size() && modelA.docmod != nullptr) {
-    // MODIFY THIS TO SET modelA.docmod.to and .from
-    // TODO TODO TODO
+    modelA.docmod->from = 0;
+    modelA.docmod->to = int(modelA.docmod->corpus.size());
     int docmodsize = modelA.docmod->rae->getThetaSize()
       + modelB.docmod->rae->getThetaSize()
       + modelA.docmod->rae->de_->getThetaSize()
       + modelB.docmod->rae->de_->getThetaSize();
+    std::cout << "Entering Docprop" << std::endl;
     computeBiCostAndGrad(*modelA.docmod, *modelB.docmod, x, ptr, docmodsize, 1,
                          *prop.docprop, error);
+    std::cout << "Leaving Docprop" << std::endl;
   }
 }
 

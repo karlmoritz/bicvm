@@ -1,7 +1,7 @@
 // File: openqa_bordes_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Tue 16 Sep 2014 17:51:41 BST
+// Last Update: Tue 14 Oct 2014 13:19:01 BST
 
 #include "openqa_bordes_trainer.h"
 
@@ -12,7 +12,7 @@
 #include "models.h"
 
 void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
-                        int n, int iteration, BProps& props, Real* error)
+                        int number_vars, int iteration, BProps& props, Real* error)
 {
   assert(props.propB != nullptr);
   assert(props.docprop != nullptr);
@@ -22,11 +22,11 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
   props.docprop->propA->reset();
   props.docprop->propB->reset();
 
-  WeightVectorType zeroMe(gradient_location,n); zeroMe.setZero(); // set gradients to zero.
+  WeightVectorType zeroMe(gradient_location,number_vars); zeroMe.setZero(); // set gradients to zero.
 
   if (iteration % 2 == 0) {
     // Question - Query
-    computeBiCostAndGrad(model, *model.b, gradient_location, n, iteration, props, error, true);
+    computeBiCostAndGrad(model, *model.b, gradient_location, number_vars, iteration, props, error, true);
   }
   else {
     // Question - Question Paraphrases
@@ -34,13 +34,13 @@ void OpenQABordesTrainer::computeCostAndGrad( Model& model, const Real* x, Real*
     int modsize_B = model.b->rae->getThetaSize();
     Real* ptr = gradient_location;
     ptr += modsize_A + modsize_B;
-    int m = n - modsize_A - modsize_B;
+    int m = number_vars - modsize_A - modsize_B;
     computeBiCostAndGrad(*model.docmod, *(model.b->docmod), ptr, m, iteration, *props.docprop, error, false);
   }
 }
 
 void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
-                          Real *gradient_location, int n, int iteration,
+                          Real *gradient_location, int number_vars, int iteration,
                           BProps &prop, Real* error, bool near_noise) {
 
   int modsize_A = modelA.rae->getThetaSize();
@@ -59,7 +59,7 @@ void OpenQABordesTrainer::computeBiCostAndGrad(Model &modelA, Model &modelB,
     ptr += modelB.docmod->rae->getThetaSize();
   }
   WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
-  assert (gradient_location + n == ptr);
+  assert (gradient_location + number_vars == ptr);
 
 /*
  * #pragma omp single
