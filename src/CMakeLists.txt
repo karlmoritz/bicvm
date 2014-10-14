@@ -83,7 +83,7 @@ add_library(pugi SHARED pugi/pugixml.cpp)
 #############################################
 
 set(EXECUTABLES dbltrain doctrain extract-vectors extract-comp-vectors
-  ted-to-libsvm qqtrain qq-extract-relent qq-extract-text qq-rerank-eval
+  qqtrain qq-extract-relent qq-extract-text qq-rerank-eval
   bordestrain fastbtrain)
 foreach(f ${EXECUTABLES})
   add_executable(${f} ${f}.cc)
