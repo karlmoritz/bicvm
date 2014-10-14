@@ -1,7 +1,7 @@
 // File: openqa_trainer.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 16-01-2013
-// Last Update: Tue 16 Sep 2014 17:51:05 BST
+// Last Update: Tue 14 Oct 2014 13:21:12 BST
 
 #include "openqa_trainer.h"
 
@@ -12,16 +12,16 @@
 #include "models.h"
 
 void OpenQATrainer::computeCostAndGrad( Model& model, const Real* x, Real* gradient_location,
-                        int n, int iteration, BProps& props, Real* error)
+                        int number_vars, int iteration, BProps& props, Real* error)
 {
   props.propA->reset();
   if (props.propB != nullptr) { props.propB->reset(); }
   if (props.docprop != nullptr) { props.docprop->propA->reset(); props.docprop->propB->reset(); }
-  computeBiCostAndGrad(model, *model.b, x, gradient_location, n, iteration, props, error);
+  computeBiCostAndGrad(model, *model.b, x, gradient_location, number_vars, iteration, props, error);
 }
 
 void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Real *x,
-                          Real *gradient_location, int n, int iteration,
+                          Real *gradient_location, int number_vars, int iteration,
                           BProps &prop, Real* error) {
 
   int modsize_A = modelA.rae->getThetaSize();
@@ -33,7 +33,7 @@ void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Rea
   WeightVectorType weightsA(ptr,modsize_A); ptr += modsize_A;
   WeightVectorType weightsB(ptr,modsize_B); ptr += modsize_B;
   WeightVectorType dweightsA(ptr,dictsize_A); ptr += dictsize_A;
-  assert (gradient_location + n == ptr);
+  assert (gradient_location + number_vars == ptr);
 
 #pragma omp single
   {
@@ -58,7 +58,7 @@ void OpenQATrainer::computeBiCostAndGrad(Model &modelA, Model &modelB, const Rea
     new (&docgrad_AD) WeightMatrixType(ptr, docAdict_size, word_width);
     ptr += dictsize_C;
   }
-  assert (gradient_location + n == ptr);
+  assert (gradient_location + number_vars == ptr);
 
   Real gamma = modelA.gamma;
 

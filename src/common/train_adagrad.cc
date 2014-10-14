@@ -1,7 +1,7 @@
 // File: train_adagrad.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 15 Sep 2014 15:38:21 BST
+// Last Update: Tue 14 Oct 2014 13:12:14 BST
 
 // STL
 #include <iostream>
@@ -38,7 +38,9 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
   int extended_vars = number_vars;
   if (model.docmod != nullptr) {
     extended_vars += model.docmod->rae->getThetaSize() +
-      model.b->docmod->rae->getThetaSize();
+      model.docmod->rae->getThetaDSize() +
+      model.b->docmod->rae->getThetaSize() +
+      model.b->docmod->rae->getThetaDSize();
   }
   Real* gradient = new Real[extended_vars]();
 
@@ -85,6 +87,7 @@ int train_adagrad(Model &model, int iterations, Real eta, Model *tmodel,
           model.lambdas = lambdas;
           model.lambdas.multiply((model.to - model.from) / size);
           // This will need fixing for other docmods!
+          // We should only use docmod at the end (final batch)
           if (model.docmod != nullptr) {
             model.docmod->noise_sample_offset = rand(rd);
             model.docmod->from = batch*doc_batchsize;

@@ -1,7 +1,7 @@
 // File: doctrain.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Mon 12 May 2014 18:14:50 BST
+// Last Update: Tue 14 Oct 2014 13:02:13 BST
 
 // STL
 #include <iostream>
@@ -288,7 +288,6 @@ int main(int argc, char **argv)
   bool fonly      = false; //vm["fonly"].as<bool>();
 
   Real eta       = vm["eta"].as<Real>();
-  cout << "eta is: " << eta << endl;
   Real ftceta    = vm["ftceta"].as<Real>();
   Real alpha     = vm["alpha"].as<Real>();
   Real gamma     = vm["gamma"].as<Real>();
@@ -361,23 +360,25 @@ int main(int argc, char **argv)
   RecursiveAutoencoderBase& raeB = *raeptrB;
   RecursiveAutoencoderBase& docraeA = *docraeptrA;
   RecursiveAutoencoderBase& docraeB = *docraeptrB;
+  DictionaryEmbeddings* deA = new DictionaryEmbeddings(config.word_representation_size);
+  DictionaryEmbeddings* deB = new DictionaryEmbeddings(config.word_representation_size);
+  DictionaryEmbeddings* docdeA = new DictionaryEmbeddings(config.word_representation_size);
+  DictionaryEmbeddings* docdeB = new DictionaryEmbeddings(config.word_representation_size);
 
   if (vm.count("model1-in"))
   {
-    // Possibly copy over config from the loaded models into the docmods?!
     std::ifstream ifs(vm["model1-in"].as<string>());
     boost::archive::text_iarchive ia(ifs);
-    ia >> raeA;
+    ia >> raeA >> *deA;
     create_new_dict_A = false;
   }
   if (vm.count("model2-in"))
   {
     std::ifstream ifs(vm["model2-in"].as<string>());
     boost::archive::text_iarchive ia(ifs);
-    ia >> raeB;
+    ia >> raeB >> *deB;
     create_new_dict_B = false;
   }
-
 
   // Update the "history" maker in the config file
   std::stringstream ss;
@@ -387,7 +388,6 @@ int main(int argc, char **argv)
     ss << "(" << vm["linesearch"].as<string>() << ")";
   ss << " it:" << iterations; // << " wcat/only:" << wcat << " " << wcatonly;
   ss << " lambdas: "  << "/" << lambdas.Wl << "/";
-  // ss                 << lambdaFT;
   raeA.config.history = ss.str();
   raeB.config.history = ss.str();
 
@@ -406,14 +406,13 @@ int main(int argc, char **argv)
       cerr << iter->second.as<int>() << endl;
     if ( type == typeid( double ) )
       cerr << iter->second.as<double>() << endl;
-    if ( type == typeid( Real ) )
-      cerr << iter->second.as<Real>() << endl;
+    if ( type == typeid( float ) )
+      cerr << iter->second.as<float>() << endl;
     if ( type == typeid( bool ) )
       cerr << iter->second.as<bool>() << endl;
   }
   cerr << "# History" << endl << "# " << raeA.config.history << endl;
   cerr << "################################" << endl;
-
 
   /***************************************************************************
    *              Read in training data (positive and negative)              *
@@ -431,10 +430,10 @@ int main(int argc, char **argv)
   if (embeddings_typeA == 2) embeddings_typeB = 3;
 
   {
-    Senna sennaA(raeA,embeddings_typeA);
-    Senna sennaB(raeB,embeddings_typeB);
-    Senna sennadocA(docraeA,-1);
-    Senna sennadocB(docraeB,-1);
+    Senna sennaA(*deA,embeddings_typeA);
+    Senna sennaB(*deB,embeddings_typeB);
+    Senna sennadocA(*docdeA,-1);
+    Senna sennadocB(*docdeB,-1);
     //        where,       filename,       cv, use_cv, test?, label, add?,       senna?
     if (!inputA.empty())
       load_doc::load_file(modelA.corpus, docmodA.corpus, inputA, create_new_dict_A, sennaA, sennadocA);
@@ -444,24 +443,24 @@ int main(int argc, char **argv)
     cout << "L1 Size " << modelA.corpus.size() << endl;
     cout << "L2 Size " << modelB.corpus.size() << endl;
 
-    // Don't initialize words randomly if we use senna embeddings.
+    // (Re)create dictionary space and add senna embeddings.
     if (create_new_dict_A) {
-      raeA.finalizeDictionary(true); sennaA.applyEmbeddings(); }
+      raeA.createTheta(true); deA->createTheta(true); sennaA.applyEmbeddings(); }
     if (create_new_dict_B) {
-      raeB.finalizeDictionary(true); sennaB.applyEmbeddings(); }
-    docraeA.finalizeDictionary(true); // could probably skip random init (i.e. set false).
-    docraeB.finalizeDictionary(true);
+      raeB.createTheta(true); deB->createTheta(true); sennaB.applyEmbeddings(); }
+
+    docraeA.createTheta(true); docdeA->createTheta(true);
+    docraeB.createTheta(true); docdeB->createTheta(true);
   }
 
   /***************************************************************************
    *           Setup model and update dictionary if created above            *
    ***************************************************************************/
 
-  modelA.rae = reindex_dict(raeA,modelA.corpus);
-  modelB.rae = reindex_dict(raeB,modelB.corpus);
-  docmodA.rae = reindex_dict(docraeA,docmodA.corpus);
-  docmodB.rae = reindex_dict(docraeB,docmodB.corpus);
-
+  modelA.rae = &raeA;
+  modelB.rae = &raeB;
+  docmodA.rae = &docraeA;
+  docmodB.rae = &docraeB;
   // Hacky: alphas directly into model.
   modelA.rae->alpha_rae = lambdas.alpha_rae;
   modelA.rae->alpha_lbl = lambdas.alpha_lbl;
@@ -472,22 +471,49 @@ int main(int argc, char **argv)
   docmodB.rae->alpha_rae = lambdas.alpha_rae;
   docmodB.rae->alpha_lbl = lambdas.alpha_lbl;
 
-  delete &raeA;
-  delete &raeB;
-  delete &docraeA;
-  delete &docraeB;
+  // Associate dictionaries with RAEs.
+  modelA.rae->de_ = reindex_dict(*deA,modelA.corpus);
+  modelB.rae->de_ = reindex_dict(*deB,modelB.corpus);
+  docmodA.rae->de_ = reindex_dict(*docdeA,docmodA.corpus);
+  docmodB.rae->de_ = reindex_dict(*docdeB,docmodB.corpus);
+  delete deA;
+  delete deB;
+  delete docdeA;
+  delete docdeB;
 
-  int ab_size = modelA.rae->getThetaSize() + modelB.rae->getThetaSize();
-  Real* theta = new Real[ab_size](); // so they are next to each other.
-  modelA.rae->finalizeSpecific(theta);
-  modelB.rae->finalizeSpecific(theta + modelA.rae->getThetaSize());
+  int ab_size = modelA.rae->getThetaSize()
+              + modelB.rae->getThetaSize()
+              + modelA.rae->de_->getThetaSize()
+              + modelB.rae->de_->getThetaSize();
+  int offset = 0;
+  Real* theta = new Real[ab_size]();
+  modelA.rae->moveToAddress(theta + offset);
+  offset += modelA.rae->getThetaSize();
+  modelB.rae->moveToAddress(theta + offset);
+  offset += modelB.rae->getThetaSize();
+  modelA.rae->de_->moveToAddress(theta + offset);
+  offset += modelA.rae->de_->getThetaSize();
+  modelB.rae->de_->moveToAddress(theta + offset);
+
+  // Sets some model parameters such as maximum sentence and node length to
+  // speed up memory access and parallelisation later on.
   modelA.finalize();
   modelB.finalize();
 
-  ab_size = docmodA.rae->getThetaSize() + docmodB.rae->getThetaSize();
-  Real* theta2 = new Real[ab_size](); // so they are next to each other.
-  docmodA.rae->finalizeSpecific(theta2);
-  docmodB.rae->finalizeSpecific(theta2 + docmodA.rae->getThetaSize());
+  ab_size = docmodA.rae->getThetaSize()
+          + docmodB.rae->getThetaSize()
+          + docmodA.rae->de_->getThetaSize()
+          + docmodB.rae->de_->getThetaSize();
+  offset = 0;
+  Real* theta2 = new Real[ab_size]();
+  docmodA.rae->moveToAddress(theta2 + offset);
+  offset += docmodA.rae->getThetaSize();
+  docmodB.rae->moveToAddress(theta2 + offset);
+  offset += docmodB.rae->getThetaSize();
+  docmodA.rae->de_->moveToAddress(theta2 + offset);
+  offset += docmodA.rae->de_->getThetaSize();
+  docmodB.rae->de_->moveToAddress(theta2 + offset);
+
   docmodA.finalize();
   docmodB.finalize();
 
@@ -529,6 +555,8 @@ int main(int argc, char **argv)
   }
 
   cout << "Dict size: " << modelA.rae->getDictSize() << " and " << modelB.rae->getDictSize() << endl;
+
+  modelA.trainer = new GeneralTrainer();
 
   /***************************************************************************
    *                              BFGS training                              *
@@ -572,12 +600,12 @@ int main(int argc, char **argv)
   {
     std::ofstream ofs(vm["model1-out"].as<string>());
     boost::archive::text_oarchive oa(ofs);
-    oa << *(modelA.rae);
+    oa << *(modelA.rae) << *(modelA.rae->de_);
   }
 
   {
     std::ofstream ofs(vm["model2-out"].as<string>());
     boost::archive::text_oarchive oa(ofs);
-    oa << *(modelB.rae);
+    oa << *(modelB.rae) << *(modelB.rae->de_);
   }
 }

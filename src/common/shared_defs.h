@@ -1,7 +1,7 @@
 // File: shared_defs.h
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 07-01-2013
-// Last Update: Mon 15 Sep 2014 14:15:05 BST
+// Last Update: Tue 14 Oct 2014 12:41:42 BST
 
 #ifndef COMMON_SHARED_DEFS_H
 #define COMMON_SHARED_DEFS_H
@@ -115,6 +115,7 @@ struct TrainingCorpus
   vector<int> doc_id;
 
   int size() { return words.size(); }
+  int size() const { return words.size(); }
   vector<LabelID> operator [](int i) const {return words[i];}
   vector<LabelID> & operator [](int i) {return words[i];}
   void push_back(Sentence s) {
