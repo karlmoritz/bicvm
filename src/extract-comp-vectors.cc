@@ -1,7 +1,7 @@
 // File: extract-comp-vectors.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 11:18:05 BST
+// Last Update: Tue 14 Oct 2014 14:02:39 BST
 
 // STL
 #include <iostream>
@@ -158,6 +158,7 @@ int main(int argc, char **argv)
   ModelData config;
 
   /*
+   * // Some code for loading baseline embeddings.
    * int embeddings = vm["embeddings"].as<int>();
    * if (embeddings == 0)
    *   config.word_representation_size = 50;
@@ -170,7 +171,6 @@ int main(int argc, char **argv)
    */
 
   RecursiveAutoencoderBase* raeptrA = nullptr;
-  // RecursiveAutoencoderBase* docraeAptr = nullptr;
 
   string type = vm["type"].as<string>();
   if (type == "additive") {
@@ -181,15 +181,8 @@ int main(int argc, char **argv)
     cout << "Model (" << type << ") does not exist" << endl; return -1;
   }
 
-  /*
-   * if ( vm["mode"].as<string>() == "average" ) {
-   *   delete docraeAptr;
-   *   docraeAptr = new additive::RecursiveAutoencoder(config);
-   * }
-   */
-
   RecursiveAutoencoderBase& raeA = *raeptrA;
-  // RecursiveAutoencoderBase& docraeA = *docraeAptr;
+  DictionaryEmbeddings* deA = new DictionaryEmbeddings(config.word_representation_size);
 
   /***************************************************************************
    *              Read in model and create raeA and docraeA                   *
@@ -198,21 +191,18 @@ int main(int argc, char **argv)
   if (vm.count("model")) {
     std::ifstream ifs(vm["model"].as<string>());
     boost::archive::text_iarchive ia(ifs);
-    ia >> raeA;
-    // docraeA.config = raeA.config;
+    ia >> raeA >> *deA;
   }
 
-  Model modelA; //, docmodA;
-  Senna sennaA(raeA,-1); //embeddings);
-  // Senna sennadocA(docraeA,-1);
+  Model modelA;
+  Senna sennaA(*deA,-1); // embeddings);
   string inputA = vm["input"].as<string>();
-  bool add_to_dict = false;
+  bool create_new_dict = false;
   /*
    * if (vm["mode"].as<string>() == "baseline")
-   *   add_to_dict = true;
+   *   create_new_dict = true;
    */
-  // load_doc::load_file(modelA.corpus, docmodA.corpus, inputA, add_to_dict, sennaA, sennadocA);
-  load_plain::load_file(modelA.corpus, inputA, 0, add_to_dict, sennaA);
+  load_plain::load_file(modelA.corpus, inputA, 0, create_new_dict, sennaA);
   // docraeA.finalizeDictionary(true);
 
   /*
@@ -223,13 +213,24 @@ int main(int argc, char **argv)
    * }
    */
 
-  modelA.rae = reindex_dict(raeA,modelA.corpus);
-  // docmodA.rae = reindex_dict(docraeA,docmodA.corpus);
-  modelA.finalize();
-  // docmodA.finalize();
+  if (create_new_dict) {
+    raeA.createTheta(true); deA->createTheta(true); sennaA.applyEmbeddings(); }
 
-  delete &raeA;
-  // delete &docraeA;
+  modelA.rae = &raeA;
+
+  // Associate dictionaries with RAEs.
+  modelA.rae->de_ = reindex_dict(*deA,modelA.corpus);
+  delete deA;
+
+  int ab_size = modelA.rae->getThetaSize()
+              + modelA.rae->de_->getThetaSize();
+  int offset = 0;
+  Real* theta = new Real[ab_size]();
+  modelA.rae->moveToAddress(theta + offset);
+  offset += modelA.rae->getThetaSize();
+  modelA.rae->de_->moveToAddress(theta + offset);
+
+  modelA.finalize();
 
   /***************************************************************************
    *            Read in input file and create sentence strings               *
