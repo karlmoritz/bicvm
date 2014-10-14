@@ -1,7 +1,7 @@
 // File: extract-vectors.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Fri 23 May 2014 09:53:54 BST
+// Last Update: Tue 14 Oct 2014 15:08:59 BST
 
 // STL
 #include <iostream>
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   bpo::options_description generic("Allowed options");
   generic.add_options()
     ("type", bpo::value<string>()->default_value("additive"),
-     "type of model (additive, ccaeb, mvrnn, ...)")
+     "type of model (additive, additive, flattree, ...)")
     ("input", bpo::value<string>(),
      "vocabulary list for which vectors should be printed")
     ("model,m", bpo::value<string>(), "input model")

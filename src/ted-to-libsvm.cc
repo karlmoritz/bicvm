@@ -1,7 +1,7 @@
 // File: ted-to-libsvm.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Wed 14 May 2014 11:18:16 BST
+// Last Update: Tue 14 Oct 2014 15:08:59 BST
 
 // STL
 #include <iostream>
@@ -87,8 +87,8 @@ int main(int argc, char **argv)
     ;
   bpo::options_description generic("Allowed options");
   generic.add_options()
-    ("type", bpo::value<string>()->default_value("ccaeb"),
-     "type of model (ccaeb, mvrnn, ...)")
+    ("type", bpo::value<string>()->default_value("additive"),
+     "type of model (additive, flattree, ...)")
     ("input", bpo::value<string>()->default_value(""),
      "input directory containing *.ted files")
     ("model", bpo::value<string>(), "model")
