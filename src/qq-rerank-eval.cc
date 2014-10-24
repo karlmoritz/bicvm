@@ -1,7 +1,7 @@
 // File: qq-rerank-eval.cc
 // Author: Karl Moritz Hermann (mail@karlmoritz.com)
 // Created: 01-01-2013
-// Last Update: Tue 14 Oct 2014 15:08:59 BST
+// Last Update: Fri 24 Oct 2014 12:41:40 BST
 
 // STL
 #include <iostream>
@@ -182,16 +182,16 @@ int main(int argc, char **argv)
       backpropQ1->forwardPropagate(j,&queryA);
       backpropQ2->forwardPropagate(j,&queryB);
       // Ensure we only consider queries for which we have both embeddings.
-      if (modelB.corpus[j].words[1] != 0) {
+      if (modelB.corpus.words[j][1] != 0) {
         cosineA = ((x.transpose() * queryA).sum() / (x.norm() * queryA.norm()));
         euclideanA = (x - queryA).squaredNorm();
       }
-      if (modelC.corpus[j].words[1] != 0) {
+      if (modelC.corpus.words[j][1] != 0) {
         cosineB = ((x.transpose() * queryB).sum() / (x.norm() * queryB.norm()));
         euclideanB = (x - queryB).squaredNorm();
       }
-      cosine = (modelB.corpus[j].words[1] != 0) ? max(cosineA,cosineB) : cosineB;
-      euclidean = (modelB.corpus[j].words[1] != 0) ? min(euclideanA,euclideanB) : euclideanB;
+      cosine = (modelB.corpus.words[j][1] != 0) ? max(cosineA,cosineB) : cosineB;
+      euclidean = (modelB.corpus.words[j][1] != 0) ? min(euclideanA,euclideanB) : euclideanB;
       res_file << cosineA << endl;
       raw_file << euclidean << endl;
     }
