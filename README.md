@@ -18,7 +18,7 @@ This code require several libraries in order to run:
 * PugiXML (included)
 * libLBFGS (http://www.chokkan.org/software/liblbfgs/)
 * Boost
-* Eigen
+* Eigen (version >3.2.0)
 
 Installation
 ====
