@@ -43,8 +43,8 @@ More documentation to come - please contribute!
 
 One simple example
 ```
-./dbltrain --input1 sample/english \
-    --input2 sample/german \
+./dbltrain --input1 ../sample/english \
+    --input2 ../sample/german \
     --tree plain \
     --type additive \
     --method adagrad \
