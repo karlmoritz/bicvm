@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <random>
 
 #include "common/dictionary_embeddings.h"
 
