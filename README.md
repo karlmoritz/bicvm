@@ -31,6 +31,16 @@ Install via CMake:
    make
 ```
 
+Install via Docker:
+   There is also Docker image for BiCVM (https://hub.docker.com/r/mpolatcan/bicvm/)
+```
+   sudo docker pull mpolatcan/bicvm 
+```
+   Run this Docker image with that command:
+```
+   sudo docker run -it --name bicvm mpolatcan/bicvm bash
+```
+
 Usage
 ====
 
